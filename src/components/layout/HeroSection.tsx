@@ -135,7 +135,7 @@ export default function HeroSection() {
 
       <section
         className="relative w-full overflow-hidden"
-        style={{ minHeight: "100svh" }}
+        style={{ minHeight: "80vh" }}
         aria-label="Hero Image Slider"
       >
         {/* Slides */}
@@ -192,7 +192,7 @@ export default function HeroSection() {
         {/* Content */}
         <div
           className="relative z-20 flex flex-col items-center justify-center text-center text-white px-6"
-          style={{ minHeight: "100svh", paddingTop: "80px", paddingBottom: "80px" }}
+          style={{ minHeight: "80vh", paddingTop: "80px", paddingBottom: "80px" }}
         >
           <div key={current} className="hero-content-enter max-w-3xl mx-auto">
             {/* Badge */}
