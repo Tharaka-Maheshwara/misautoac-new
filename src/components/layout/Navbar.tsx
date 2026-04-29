@@ -1,0 +1,62 @@
+'use client';
+
+import Image from 'next/image';
+import Link from "next/link";
+
+const navLinks = [
+  { label: "Home", href: "/" },
+  { label: "Services", href: "/pages/services" },
+  { label: "About Us", href: "/pages/about" },
+  { label: "Spare Parts", href: "/pages/spare-parts" },
+  { label: "Contact", href: "/pages/contact" },
+];
+
+export default function Navbar() {
+  return (
+    <header className="w-full border-b border-slate-200 bg-gradient-to-b from-white to-slate-50">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-3 md:flex-row md:items-center md:justify-between">
+        <Link
+          href="/"
+          className="flex items-center gap-3 text-lg font-semibold text-slate-900"
+          aria-label="Mist Auto A/C"
+        >
+          <div className="relative h-20 w-20">
+            <Image
+              src="/logo/mist-auto-logo.jpeg"
+              alt="Mist Auto A/C Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+          <span className="leading-tight">
+            <span className="block text-2xl font-bold text-blue-700">Mist Auto</span>
+            <span className="block text-sm font-semibold text-blue-600">A/C Service</span>
+          </span>
+        </Link>
+
+        <nav aria-label="Primary">
+          <ul className="flex flex-wrap items-center gap-5 text-lg font-medium text-slate-600">
+            {navLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="transition-colors hover:text-slate-900"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <Link
+          href="/pages/contact"
+          className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-blue-500"
+        >
+          Book Appointment
+        </Link>
+      </div>
+    </header>
+  );
+}
