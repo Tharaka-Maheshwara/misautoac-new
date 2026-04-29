@@ -14,7 +14,7 @@ export default function Home() {
     <div className="min-h-screen bg-white">
       <HeroSection />
       <section className="w-full bg-sky-50">
-        <div className="mx-auto max-w-6xl px-6 py-10 text-center">
+        <div className="mx-auto max-w-6xl px-6 py-10 text-center md:py-14">
           <h2 className="text-2xl font-semibold text-slate-900 md:text-3xl">
             Your Premium Auto AC Specialists
           </h2>
@@ -22,33 +22,20 @@ export default function Home() {
             Expert Auto AC services for all makes and models, with genuine parts
             and premium specialists.
           </p>
-        </div>
-      </section>
-
-      <section className="w-full bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-12 md:py-16">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-sky-600">
-              Our Expertise
-            </p>
-            <h3 className="mt-2 text-2xl font-bold text-slate-900 md:text-3xl">
+          <div className="mt-8">
+            <h3 className="text-xl font-bold text-slate-900 md:text-2xl">
               Key Services
             </h3>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 md:text-base">
-              Complete cooling and refrigeration solutions delivered by
-              experienced technicians with trusted parts.
-            </p>
-          </div>
-
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-5 grid gap-4 text-left sm:grid-cols-2 lg:grid-cols-3">
             {keyServices.map((service) => (
               <div
                 key={service}
-                className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-medium text-slate-800 shadow-sm transition-colors hover:border-sky-300 hover:bg-sky-50 md:text-base"
+                className="rounded-xl border border-sky-100 bg-white px-5 py-4 text-sm font-medium text-slate-800 shadow-sm md:text-base"
               >
                 {service}
               </div>
             ))}
+            </div>
           </div>
         </div>
       </section>
