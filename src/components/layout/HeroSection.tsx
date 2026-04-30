@@ -5,26 +5,26 @@ import { useState, useEffect, useCallback } from "react";
 
 const slides = [
   {
-    image: "/hero_slide_4.jpg",
+    image: "/Hero%20Section%20images/hero_slide_4.jpg",
     badge: "✅ Trusted Service",
     title: "Reliable Air Conditioning and Refrigeration Services",
     subtitle:
       "Service by skilled technicians with over 10 years of experience using high-quality spare parts.",
   },
   {
-    image: "/hero_slide_1.jpg",
+    image: "/Hero%20Section%20images/hero_slide_1.jpg",
     badge: "🔧 Expert Technicians",
     title: "Stay Cool on the Road",
     subtitle: "Expert Auto AC Services for All Makes and Models.",
   },
   {
-    image: "/hero_slide_2.jpg",
+    image: "/Hero%20Section%20images/hero_slide_2.jpg",
     badge: "❄️ Premium Cooling",
     title: "Maximum Comfort, Every Drive",
     subtitle: "Precision AC diagnosis, repair & refrigerant recharge services.",
   },
   {
-    image: "/hero_slide_3.jpg",
+    image: "/Hero%20Section%20images/hero_slide_3.jpg",
     badge: "⚙️ Advanced Equipment",
     title: "Professional Grade Service",
     subtitle:
