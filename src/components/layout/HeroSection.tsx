@@ -5,6 +5,13 @@ import { useState, useEffect, useCallback } from "react";
 
 const slides = [
   {
+    image: "/hero_slide_4.jpg",
+    badge: "✅ Trusted Service",
+    title: "Reliable Air Conditioning and Refrigeration Services",
+    subtitle:
+      "Service by skilled technicians with over 10 years of experience using high-quality spare parts.",
+  },
+  {
     image: "/hero_slide_1.jpg",
     badge: "🔧 Expert Technicians",
     title: "Stay Cool on the Road",
