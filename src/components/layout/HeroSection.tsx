@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
@@ -27,7 +27,8 @@ const slides = [
     image: "/hero_slide_3.jpg",
     badge: "⚙️ Advanced Equipment",
     title: "Professional Grade Service",
-    subtitle: "State-of-the-art tools for your vehicle's air conditioning system.",
+    subtitle:
+      "State-of-the-art tools for your vehicle's air conditioning system.",
   },
 ];
 
@@ -44,7 +45,7 @@ export default function HeroSection() {
         setAnimating(false);
       }, 500);
     },
-    [animating]
+    [animating],
   );
 
   const nextSlide = useCallback(() => {
@@ -166,7 +167,11 @@ export default function HeroSection() {
         {/* Subtle top shimmer line */}
         <div
           className="absolute top-0 left-0 right-0 z-20"
-          style={{ height: "2px", background: "linear-gradient(90deg,transparent,#3b82f6,transparent)" }}
+          style={{
+            height: "2px",
+            background:
+              "linear-gradient(90deg,transparent,#3b82f6,transparent)",
+          }}
         />
 
         {/* Progress bar */}
@@ -179,7 +184,16 @@ export default function HeroSection() {
           onClick={prevSlide}
           aria-label="Previous slide"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
@@ -191,7 +205,16 @@ export default function HeroSection() {
           onClick={nextSlide}
           aria-label="Next slide"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </button>
@@ -199,7 +222,11 @@ export default function HeroSection() {
         {/* Content */}
         <div
           className="relative z-20 flex flex-col items-center justify-center text-center text-white px-6"
-          style={{ minHeight: "80vh", paddingTop: "80px", paddingBottom: "80px" }}
+          style={{
+            minHeight: "80vh",
+            paddingTop: "80px",
+            paddingBottom: "80px",
+          }}
         >
           <div key={current} className="hero-content-enter max-w-3xl mx-auto">
             {/* Badge */}
@@ -222,7 +249,11 @@ export default function HeroSection() {
             {/* Subtitle */}
             <p
               className="mb-10 text-blue-100 mx-auto"
-              style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)", maxWidth: "540px", lineHeight: 1.7 }}
+              style={{
+                fontSize: "clamp(1rem, 2vw, 1.25rem)",
+                maxWidth: "540px",
+                lineHeight: 1.7,
+              }}
             >
               {slides[current].subtitle}
             </p>
@@ -236,8 +267,18 @@ export default function HeroSection() {
                   background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
                   boxShadow: "0 8px 28px rgba(37,99,235,0.45)",
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 36px rgba(37,99,235,0.6)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px rgba(37,99,235,0.45)"; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.transform =
+                    "translateY(-2px)";
+                  (e.currentTarget as HTMLElement).style.boxShadow =
+                    "0 12px 36px rgba(37,99,235,0.6)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.transform =
+                    "translateY(0)";
+                  (e.currentTarget as HTMLElement).style.boxShadow =
+                    "0 8px 28px rgba(37,99,235,0.45)";
+                }}
               >
                 Book Appointment
               </Link>
@@ -250,8 +291,14 @@ export default function HeroSection() {
                   backdropFilter: "blur(10px)",
                   color: "white",
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.25)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.12)"; }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "rgba(255,255,255,0.25)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "rgba(255,255,255,0.12)";
+                }}
               >
                 View Services
               </Link>
