@@ -1,6 +1,7 @@
 import PrecisionCoolingSection from "@/components/layout/PrecisionCoolingSection";
 import WhoAreWeSection from "@/components/layout/WhoAreWeSection";
 import TeamSection from "@/components/layout/TeamSection";
+import CtaSection from "@/components/layout/CtaSection";
 
 export default function AboutPage() {
   return (
@@ -8,6 +9,7 @@ export default function AboutPage() {
       <PrecisionCoolingSection />
       <WhoAreWeSection />
       <TeamSection />
+      <CtaSection />
     </main>
   );
 }
