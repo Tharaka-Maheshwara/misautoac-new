@@ -2,9 +2,11 @@ export default function ContactPage() {
   return (
     <main className="flex flex-col min-h-screen">
       {/* Contact Header Section */}
-      <section 
+      <section
         className="relative text-white py-24 px-4 text-center bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/Hero Section images/hero_slide_1.jpg')" }}
+        style={{
+          backgroundImage: "url('/Hero Section images/hero_slide_1.jpg')",
+        }}
       >
         <div className="absolute inset-0 bg-[#042f56]/80 mix-blend-multiply"></div>
         <div className="relative z-10">
@@ -12,8 +14,8 @@ export default function ContactPage() {
             Contact Us
           </h1>
           <p className="text-sm md:text-base text-gray-200 max-w-2xl mx-auto leading-relaxed">
-            Experience the ultimate chill. Our expert engineering team is standing
-            by to
+            Experience the ultimate chill. Our expert engineering team is
+            standing by to
             <br className="hidden md:block" />
             restore your vehicle's performance and comfort.
           </p>
