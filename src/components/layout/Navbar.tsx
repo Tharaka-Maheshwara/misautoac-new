@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -12,6 +13,8 @@ const navLinks = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
+
   return (
     <header className="w-full border-b border-slate-200 bg-gradient-to-b from-white to-slate-50">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-3 md:flex-row md:items-center md:justify-between">
@@ -36,17 +39,24 @@ export default function Navbar() {
         </Link>
 
         <nav aria-label="Primary">
-          <ul className="flex flex-wrap items-center gap-5 text-lg font-medium text-slate-600">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="transition-colors hover:text-slate-900"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
+          <ul className="flex flex-wrap items-center gap-2 text-lg font-medium text-slate-600">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={`block rounded-lg px-4 py-2 transition-all duration-300 ${
+                      isActive
+                        ? "bg-blue-600 text-white shadow-md font-semibold"
+                        : "hover:bg-blue-100 hover:text-blue-700"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
