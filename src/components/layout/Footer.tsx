@@ -67,32 +67,50 @@ export default function Footer() {
             </h3>
             <ul className="space-y-4 text-base md:text-lg text-slate-400">
               <li>
-                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                <Link
+                  href="/pages/services"
+                  className="hover:text-blue-400 transition-colors"
+                >
                   Mist Auto A/C
                 </Link>
               </li>
               <li>
-                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                <Link
+                  href="/pages/services"
+                  className="hover:text-blue-400 transition-colors"
+                >
                   Domestic A/C & Refrigerator
                 </Link>
               </li>
               <li>
-                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                <Link
+                  href="/pages/services"
+                  className="hover:text-blue-400 transition-colors"
+                >
                   Spare Parts & Accessories
                 </Link>
               </li>
               <li>
-                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                <Link
+                  href="/pages/services"
+                  className="hover:text-blue-400 transition-colors"
+                >
                   Brand New AC Unit
                 </Link>
               </li>
               <li>
-                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                <Link
+                  href="/pages/services"
+                  className="hover:text-blue-400 transition-colors"
+                >
                   Auto Scanning
                 </Link>
               </li>
               <li>
-                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                <Link
+                  href="/pages/services"
+                  className="hover:text-blue-400 transition-colors"
+                >
                   Industrial Ref & AC
                 </Link>
               </li>
