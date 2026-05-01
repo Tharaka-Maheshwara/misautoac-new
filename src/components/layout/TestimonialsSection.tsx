@@ -37,7 +37,7 @@ export default function TestimonialsSection() {
   };
 
   return (
-    <section className="w-full bg-[#f4f9ff] py-24">
+    <section className="w-full bg-white py-24">
       <div className="mx-auto max-w-[1200px] px-6 md:px-12 text-center">
         <h2 className="mb-14 text-3xl font-bold text-slate-900 sm:text-4xl">
           What Our Customers Say
@@ -59,7 +59,7 @@ export default function TestimonialsSection() {
             {testimonials.slice(currentIndex, currentIndex + 2).map((testimonial) => (
               <div
                 key={testimonial.id}
-                className="flex flex-col justify-between rounded-2xl bg-white p-10 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] text-left transition-all duration-300 hover:-translate-y-3 hover:shadow-2xl cursor-default"
+                className="flex flex-col justify-between rounded-2xl bg-white p-10 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)] border border-slate-100 text-left transition-all duration-300 hover:-translate-y-3 hover:shadow-2xl cursor-default"
               >
                 <div>
                   {/* Quote Icon */}
