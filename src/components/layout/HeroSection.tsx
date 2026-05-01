@@ -7,6 +7,7 @@ const slides = [
   {
     image: "/Hero%20Section%20images/hero_slide_4.jpg",
     badge: "✅ Trusted Service",
+    welcomeText: "Welcome to Mist Auto A/C",
     title: "Reliable Air Conditioning and Refrigeration Services",
     subtitle:
       "Service by skilled technicians with over 10 years of experience using high-quality spare parts.",
@@ -233,6 +234,20 @@ export default function HeroSection() {
             <div className="flex justify-center">
               <span className="hero-badge">{slides[current].badge}</span>
             </div>
+
+            {/* Welcome Text */}
+            {slides[current].welcomeText && (
+              <div
+                className="mb-3 tracking-widest text-blue-300 font-semibold uppercase"
+                style={{
+                  fontSize: "clamp(0.9rem, 1.5vw, 1.1rem)",
+                  letterSpacing: "0.2em",
+                  textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+                }}
+              >
+                {slides[current].welcomeText}
+              </div>
+            )}
 
             {/* Title */}
             <h1
