@@ -59,7 +59,7 @@ export default function TestimonialsSection() {
             {testimonials.slice(currentIndex, currentIndex + 2).map((testimonial) => (
               <div
                 key={testimonial.id}
-                className="flex flex-col justify-between rounded-2xl bg-white p-10 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] text-left"
+                className="flex flex-col justify-between rounded-2xl bg-white p-10 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] text-left transition-all duration-300 hover:-translate-y-3 hover:shadow-2xl cursor-default"
               >
                 <div>
                   {/* Quote Icon */}
