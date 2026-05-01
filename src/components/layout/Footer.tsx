@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#051125] text-slate-300 py-16 border-t border-[#112a4f]">
       <div className="w-full px-6 md:px-12 lg:px-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-24 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16 mb-12">
           {/* Column 1: Brand & Description */}
           <div className="col-span-1">
             <h2 className="text-4xl font-bold mb-6 tracking-wide">
@@ -55,6 +55,45 @@ export default function Footer() {
                   className="hover:text-blue-400 transition-colors"
                 >
                   About Us
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Services */}
+          <div className="col-span-1 pl-0 md:pl-10 lg:pl-10">
+            <h3 className="text-white font-semibold text-xl md:text-2xl mb-6">
+              Services
+            </h3>
+            <ul className="space-y-4 text-base md:text-lg text-slate-400">
+              <li>
+                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                  Mist Auto A/C
+                </Link>
+              </li>
+              <li>
+                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                  Domestic A/C & Refrigerator
+                </Link>
+              </li>
+              <li>
+                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                  Spare Parts & Accessories
+                </Link>
+              </li>
+              <li>
+                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                  Brand New AC Unit
+                </Link>
+              </li>
+              <li>
+                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                  Auto Scanning
+                </Link>
+              </li>
+              <li>
+                <Link href="/pages/services" className="hover:text-blue-400 transition-colors">
+                  Industrial Ref & AC
                 </Link>
               </li>
             </ul>
