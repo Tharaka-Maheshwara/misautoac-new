@@ -10,6 +10,20 @@ export default function BookAppointmentPage() {
   const [year, setYear] = useState("");
   const [selectedDate, setSelectedDate] = useState<number | null>(21);
   const [selectedTime, setSelectedTime] = useState<string | null>("2:00 PM");
+  const selectedMonth = "May";
+  const selectedYear = 2026;
+
+  const vehicleTypes = [
+    { id: 'Car', icon: '🚗' },
+    { id: 'SUV', icon: '🚙' },
+    { id: 'Truck', icon: '🛻' },
+    { id: 'Van', icon: '🚐' },
+    { id: 'Sports Car', icon: '🏎️' },
+    { id: 'Luxury', icon: '🚘' },
+    { id: 'Electric', icon: '⚡' },
+    { id: 'Hybrid', icon: '🔋' },
+    { id: 'Other', icon: '✨' },
+  ];
 
   const services = [
     { id: 1, title: "AC Repair & Maintenance", desc: "Full inspection & repair of all AC components", time: "1–2 hrs", icon: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" },
@@ -34,7 +48,7 @@ export default function BookAppointmentPage() {
         <div className="absolute inset-0 bg-[#1e3a8a]/80 mix-blend-multiply"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-[#1e40af]/90 to-transparent"></div>
 
-        <div className="relative z-10 max-w-6xl mx-auto flex flex-col items-start text-left">
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col items-start text-left">
           {/* Top Tag */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 text-sm md:text-base backdrop-blur-sm mb-6 shadow-sm">
             <svg
@@ -69,7 +83,7 @@ export default function BookAppointmentPage() {
 
       {/* Interactive Booking Section */}
       <section className="flex-1 bg-gray-50 py-12 px-4 md:px-12 relative z-10">
-        <div className="max-w-6xl mx-auto mt-0 relative z-20">
+        <div className="max-w-7xl mx-auto mt-0 relative z-20">
           
           {/* Stepper */}
           <div className="flex items-center justify-center mb-12 flex-nowrap px-4 overflow-x-auto overflow-y-hidden pb-4">
@@ -185,10 +199,7 @@ export default function BookAppointmentPage() {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                      {[
-                        { id: 'Sedan', icon: '🚗' }, { id: 'SUV', icon: '🚙' }, { id: 'Truck', icon: '🛻' }, { id: 'Van', icon: '🚐' },
-                        { id: 'Sports Car', icon: '🏎️' }, { id: 'Luxury', icon: '🚘' }, { id: 'Electric', icon: '⚡' }, { id: 'Hybrid', icon: '🔋' }
-                      ].map((t) => (
+                      {vehicleTypes.map((t) => (
                         <div 
                           key={t.id} 
                           onClick={() => setSelectedVehicleType(t.id)}
@@ -210,7 +221,7 @@ export default function BookAppointmentPage() {
                           placeholder="e.g. Toyota Camry" 
                           value={makeModel}
                           onChange={(e) => setMakeModel(e.target.value)}
-                          className="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
                         />
                       </div>
                       <div>
@@ -220,7 +231,7 @@ export default function BookAppointmentPage() {
                           placeholder="e.g. 2021" 
                           value={year}
                           onChange={(e) => setYear(e.target.value)}
-                          className="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
                         />
                       </div>
                     </div>
@@ -339,7 +350,9 @@ export default function BookAppointmentPage() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-gray-400 mb-0.5 uppercase tracking-wide">Vehicle</p>
-                      <p className="text-sm font-semibold text-gray-900">⚡ Electric</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {vehicleTypes.find((vehicle) => vehicle.id === selectedVehicleType)?.icon} {selectedVehicleType}
+                      </p>
                     </div>
                   </div>
 
@@ -349,7 +362,9 @@ export default function BookAppointmentPage() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-gray-400 mb-0.5 uppercase tracking-wide">Date</p>
-                      <p className="text-sm font-semibold text-gray-900">May 21, 2026</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {selectedMonth} {selectedDate ?? '—'}, {selectedYear}
+                      </p>
                     </div>
                   </div>
 
@@ -359,7 +374,7 @@ export default function BookAppointmentPage() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-gray-400 mb-0.5 uppercase tracking-wide">Time</p>
-                      <p className="text-sm font-semibold text-gray-900">2:00 PM</p>
+                      <p className="text-sm font-semibold text-gray-900">{selectedTime ?? '—'}</p>
                     </div>
                   </div>
 
