@@ -3,6 +3,9 @@
 import Image from 'next/image';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import SignupModal from '../forms/SignupModal';
+import LoginModal from '../forms/LoginModal';
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -14,6 +17,8 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   return (
     <header className="w-full border-b border-slate-200 bg-gradient-to-b from-white to-slate-50">
@@ -60,12 +65,37 @@ export default function Navbar() {
           </ul>
         </nav>
 
-        <Link
-          href="/pages/book-appointment"
-          className="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-blue-500"
-        >
-          Book Appointment
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsLoginOpen(true)}
+            className="rounded-lg px-4 py-2 text-base font-medium text-slate-600 transition hover:text-slate-900"
+          >
+            Login
+          </button>
+          <button
+            onClick={() => setIsSignupOpen(true)}
+            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-base font-semibold text-white shadow-sm transition hover:bg-blue-500"
+          >
+            Sign Up
+          </button>
+        </div>
+
+          <SignupModal 
+            isOpen={isSignupOpen} 
+            onClose={() => setIsSignupOpen(false)}
+            onSwitchToLogin={() => {
+              setIsSignupOpen(false);
+              setIsLoginOpen(true);
+            }}
+          />
+          <LoginModal 
+            isOpen={isLoginOpen} 
+            onClose={() => setIsLoginOpen(false)}
+            onSwitchToSignup={() => {
+              setIsLoginOpen(false);
+              setIsSignupOpen(true);
+            }}
+          />
       </div>
     </header>
   );
