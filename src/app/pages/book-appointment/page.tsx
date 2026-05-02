@@ -16,8 +16,19 @@ export default function BookAppointmentPage() {
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [selectedDate, setSelectedDate] = useState<number | null>(21);
   const [selectedTime, setSelectedTime] = useState<string | null>("2:00 PM");
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const selectedMonth = "May";
   const selectedYear = 2026;
+
+  // Generate booking reference
+  const generateBookingReference = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "ACA-";
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
 
   const vehicleTypes = [
     { id: "Car", icon: "🚗" },
@@ -1251,11 +1262,7 @@ export default function BookAppointmentPage() {
                         Back
                       </button>
                       <button
-                        onClick={() =>
-                          alert(
-                            "Booking confirmed! Check your email for details.",
-                          )
-                        }
+                        onClick={() => setShowConfirmation(true)}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-full shadow-md flex items-center gap-2 transition-all"
                       >
                         <svg
@@ -1513,6 +1520,184 @@ export default function BookAppointmentPage() {
           </div>
         </div>
       </section>
+
+      {/* Confirmation Modal */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+            {/* Top Blue Line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-t-2xl"></div>
+
+            {/* Success Icon */}
+            <div className="flex justify-center mb-6 pt-4">
+              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {/* Heading */}
+            <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
+              Booking Confirmed!
+            </h2>
+            <p className="text-center text-sm text-gray-600 mb-6">
+              Your appointment has been scheduled successfully.
+            </p>
+
+            {/* Booking Details Box */}
+            <div className="bg-blue-50 rounded-lg border border-blue-200 p-4 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
+                  Booking Reference
+                </span>
+                <span className="text-sm font-bold text-blue-600">
+                  {generateBookingReference()}
+                </span>
+              </div>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center gap-3">
+                  <svg
+                    className="w-4 h-4 text-blue-600 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    />
+                  </svg>
+                  <span className="text-gray-700 font-medium">
+                    {selectedService
+                      ? services.find((s) => s.id === selectedService)?.title
+                      : "Service"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <svg
+                    className="w-4 h-4 text-blue-600 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                    />
+                  </svg>
+                  <span className="text-gray-700 font-medium">
+                    {vehicleTypes.find((v) => v.id === selectedVehicleType)?.icon}{" "}
+                    {selectedVehicleType}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <svg
+                    className="w-4 h-4 text-blue-600 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span className="text-gray-700 font-medium">
+                    {selectedMonth} {selectedDate}, {selectedYear}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <svg
+                    className="w-4 h-4 text-blue-600 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span className="text-gray-700 font-medium">
+                    {selectedTime}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <svg
+                    className="w-4 h-4 text-blue-600 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                  <span className="text-gray-700 font-medium">{fullName}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Email Confirmation Message */}
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <p className="text-xs text-gray-600 leading-relaxed">
+                <span className="font-semibold text-gray-900">
+                  A confirmation email has been sent to{" "}
+                </span>
+                <span className="font-semibold text-blue-600">
+                  {emailAddress}
+                </span>
+                <span className="text-gray-600">
+                  . We'll also call you 24 hours before your appointment.
+                </span>
+              </p>
+            </div>
+
+            {/* Action Button */}
+            <button
+              onClick={() => {
+                setShowConfirmation(false);
+                setCurrentStep(1);
+                setSelectedService(null);
+                setSelectedVehicleType("Electric");
+                setMakeModel("");
+                setYear("");
+                setFullName("");
+                setEmailAddress("");
+                setPhoneNumber("");
+                setAdditionalNotes("");
+                setSelectedDate(null);
+                setSelectedTime(null);
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full transition-all"
+            >
+              Book Another Appointment
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
