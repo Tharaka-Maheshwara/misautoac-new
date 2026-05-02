@@ -1601,7 +1601,10 @@ export default function BookAppointmentPage() {
                     />
                   </svg>
                   <span className="text-gray-700 font-medium">
-                    {vehicleTypes.find((v) => v.id === selectedVehicleType)?.icon}{" "}
+                    {
+                      vehicleTypes.find((v) => v.id === selectedVehicleType)
+                        ?.icon
+                    }{" "}
                     {selectedVehicleType}
                   </span>
                 </div>
