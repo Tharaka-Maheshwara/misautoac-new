@@ -221,6 +221,9 @@ export default function ContactPage() {
                     <p className="text-white text-md">
                       Mon - Sat: 8:00 AM - 6:00 PM
                     </p>
+                    <p className="text-white text-md mt-1">
+                      Sunday: <span className="text-red-500">Closed</span>
+                    </p>
                   </div>
                 </div>
               </div>
