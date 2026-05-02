@@ -5,20 +5,29 @@ import React, { useState } from "react";
 export default function BookAppointmentPage() {
   const [currentStep, setCurrentStep] = useState<number>(2);
   const activeStep = Number(currentStep);
-  const [selectedService, setSelectedService] = useState<number | null>(4);
-  const [selectedVehicleType, setSelectedVehicleType] =
-    useState<string>("Electric");
+  const [selectedService, setSelectedService] = useState<number | null>(null);
+  const [selectedVehicleType, setSelectedVehicleType] = useState<string | null>(null);
   const [makeModel, setMakeModel] = useState("");
   const [year, setYear] = useState("");
   const [fullName, setFullName] = useState("");
   const [emailAddress, setEmailAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
-  const [selectedDate, setSelectedDate] = useState<number | null>(21);
-  const [selectedTime, setSelectedTime] = useState<string | null>("2:00 PM");
+  const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const selectedMonth = "May";
   const selectedYear = 2026;
+
+  const [errors, setErrors] = useState<{
+    service?: string;
+    vehicle?: string;
+    date?: string;
+    time?: string;
+    fullName?: string;
+    email?: string;
+    phone?: string;
+  }>({});
 
   // Generate booking reference
   const generateBookingReference = () => {
@@ -322,7 +331,10 @@ export default function BookAppointmentPage() {
                     {services.map((svc) => (
                       <div
                         key={svc.id}
-                        onClick={() => setSelectedService(svc.id)}
+                        onClick={() => {
+                          setSelectedService(svc.id);
+                          setErrors((p) => ({ ...p, service: undefined }));
+                        }}
                         className={`cursor-pointer border-2 rounded-xl p-4 flex gap-4 transition-all relative ${
                           selectedService === svc.id
                             ? "border-indigo-400 bg-indigo-50/50 shadow-sm"
@@ -395,9 +407,25 @@ export default function BookAppointmentPage() {
                     ))}
                   </div>
 
+                  {errors.service && (
+                    <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 flex items-start gap-2">
+                      <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zm-8-4a1 1 0 00-.993.883L9 7v4a1 1 0 001.993.117L11 11V7a1 1 0 00-1-1zm0 9a1.25 1.25 0 100-2.5A1.25 1.25 0 0010 15z" clipRule="evenodd" />
+                      </svg>
+                      <div>{errors.service}</div>
+                    </div>
+                  )}
+
                   <div className="mt-8 flex justify-end">
                     <button
-                      onClick={() => setCurrentStep(2)}
+                      onClick={() => {
+                        if (!selectedService) {
+                          setErrors((p) => ({ ...p, service: "Please select a service to continue." }));
+                          return;
+                        }
+                        setErrors((p) => ({ ...p, service: undefined }));
+                        setCurrentStep(2);
+                      }}
                       className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-full shadow-md flex items-center gap-2 transition-all"
                     >
                       Continue
@@ -453,7 +481,10 @@ export default function BookAppointmentPage() {
                         {vehicleTypes.map((t) => (
                           <div
                             key={t.id}
-                            onClick={() => setSelectedVehicleType(t.id)}
+                            onClick={() => {
+                              setSelectedVehicleType(t.id);
+                              setErrors((p) => ({ ...p, vehicle: undefined }));
+                            }}
                             className={`cursor-pointer rounded-xl border border-gray-200 p-4 flex flex-col items-center justify-center gap-2 transition-all ${
                               selectedVehicleType === t.id
                                 ? "border-blue-500 bg-blue-50 text-blue-600"
@@ -466,6 +497,11 @@ export default function BookAppointmentPage() {
                             </span>
                           </div>
                         ))}
+                        {errors.vehicle && (
+                          <div className="mt-3 text-sm text-red-600">
+                            {errors.vehicle}
+                          </div>
+                        )}
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -617,7 +653,10 @@ export default function BookAppointmentPage() {
                             ].map((time) => (
                               <div
                                 key={time}
-                                onClick={() => setSelectedTime(time)}
+                                onClick={() => {
+                                  setSelectedTime(time);
+                                  setErrors((p) => ({ ...p, time: undefined }));
+                                }}
                                 className={`border rounded-lg p-2.5 text-center text-sm font-medium cursor-pointer transition-all flex items-center justify-center gap-1.5 ${
                                   selectedTime === time
                                     ? "bg-blue-600 border-blue-600 text-white shadow-md"
@@ -640,6 +679,9 @@ export default function BookAppointmentPage() {
                                 {time}
                               </div>
                             ))}
+                            {errors.time && (
+                              <div className="mt-2 text-sm text-red-600">{errors.time}</div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -666,7 +708,28 @@ export default function BookAppointmentPage() {
                         Back
                       </button>
                       <button
-                        onClick={() => setCurrentStep(3)}
+                        onClick={() => {
+                          let hasError = false;
+                          const newErrors: typeof errors = {};
+                          if (!selectedVehicleType) {
+                            newErrors.vehicle = "Please select your vehicle type.";
+                            hasError = true;
+                          }
+                          if (!selectedDate) {
+                            newErrors.date = "Please choose a preferred date.";
+                            hasError = true;
+                          }
+                          if (!selectedTime) {
+                            newErrors.time = "Please choose an available time slot.";
+                            hasError = true;
+                          }
+                          if (hasError) {
+                            setErrors((p) => ({ ...p, ...newErrors }));
+                            return;
+                          }
+                          setErrors((p) => ({ ...p, vehicle: undefined, date: undefined, time: undefined }));
+                          setCurrentStep(3);
+                        }}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-full shadow-md flex items-center gap-2 transition-all"
                       >
                         Continue
@@ -741,9 +804,15 @@ export default function BookAppointmentPage() {
                             type="text"
                             placeholder="John Doe"
                             value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
+                            onChange={(e) => {
+                              setFullName(e.target.value);
+                              setErrors((p) => ({ ...p, fullName: undefined }));
+                            }}
                             className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
                           />
+                          {errors.fullName && (
+                            <div className="mt-2 text-sm text-red-600">{errors.fullName}</div>
+                          )}
                         </div>
                       </div>
 
@@ -773,9 +842,15 @@ export default function BookAppointmentPage() {
                               type="email"
                               placeholder="john@example.com"
                               value={emailAddress}
-                              onChange={(e) => setEmailAddress(e.target.value)}
+                              onChange={(e) => {
+                                setEmailAddress(e.target.value);
+                                setErrors((p) => ({ ...p, email: undefined }));
+                              }}
                               className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
                             />
+                            {errors.email && (
+                              <div className="mt-2 text-sm text-red-600">{errors.email}</div>
+                            )}
                           </div>
                         </div>
 
@@ -803,9 +878,15 @@ export default function BookAppointmentPage() {
                               type="tel"
                               placeholder="+1 (234) 567-890"
                               value={phoneNumber}
-                              onChange={(e) => setPhoneNumber(e.target.value)}
+                              onChange={(e) => {
+                                setPhoneNumber(e.target.value);
+                                setErrors((p) => ({ ...p, phone: undefined }));
+                              }}
                               className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
                             />
+                            {errors.phone && (
+                              <div className="mt-2 text-sm text-red-600">{errors.phone}</div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -885,7 +966,30 @@ export default function BookAppointmentPage() {
                         Back
                       </button>
                       <button
-                        onClick={() => setCurrentStep(4)}
+                        onClick={() => {
+                          let hasError = false;
+                          const newErrors: typeof errors = {};
+                          if (!fullName.trim()) {
+                            newErrors.fullName = "Please enter your full name.";
+                            hasError = true;
+                          }
+                          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                          if (!emailAddress.trim() || !emailRegex.test(emailAddress)) {
+                            newErrors.email = "Please provide a valid email address.";
+                            hasError = true;
+                          }
+                          const phoneRegex = /^[0-9+()\-\s]{7,}$/;
+                          if (!phoneNumber.trim() || !phoneRegex.test(phoneNumber)) {
+                            newErrors.phone = "Please provide a valid phone number.";
+                            hasError = true;
+                          }
+                          if (hasError) {
+                            setErrors((p) => ({ ...p, ...newErrors }));
+                            return;
+                          }
+                          setErrors((p) => ({ ...p, fullName: undefined, email: undefined, phone: undefined }));
+                          setCurrentStep(4);
+                        }}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-full shadow-md flex items-center gap-2 transition-all"
                       >
                         Review Booking
@@ -1697,6 +1801,25 @@ export default function BookAppointmentPage() {
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full transition-all"
             >
               Book Another Appointment
+            </button>
+            <button
+              onClick={() => {
+                setShowConfirmation(false);
+                setCurrentStep(1);
+                setSelectedService(null);
+                setSelectedVehicleType("Electric");
+                setMakeModel("");
+                setYear("");
+                setFullName("");
+                setEmailAddress("");
+                setPhoneNumber("");
+                setAdditionalNotes("");
+                setSelectedDate(null);
+                setSelectedTime(null);
+              }}
+              className="w-full mt-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-full transition-all"
+            >
+              Close
             </button>
           </div>
         </div>
