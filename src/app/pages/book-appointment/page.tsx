@@ -6,7 +6,9 @@ export default function BookAppointmentPage() {
   const [currentStep, setCurrentStep] = useState<number>(2);
   const activeStep = Number(currentStep);
   const [selectedService, setSelectedService] = useState<number | null>(null);
-  const [selectedVehicleType, setSelectedVehicleType] = useState<string | null>(null);
+  const [selectedVehicleType, setSelectedVehicleType] = useState<string | null>(
+    null,
+  );
   const [makeModel, setMakeModel] = useState("");
   const [year, setYear] = useState("");
   const [fullName, setFullName] = useState("");
@@ -409,8 +411,16 @@ export default function BookAppointmentPage() {
 
                   {errors.service && (
                     <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 flex items-start gap-2">
-                      <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zm-8-4a1 1 0 00-.993.883L9 7v4a1 1 0 001.993.117L11 11V7a1 1 0 00-1-1zm0 9a1.25 1.25 0 100-2.5A1.25 1.25 0 0010 15z" clipRule="evenodd" />
+                      <svg
+                        className="w-4 h-4 flex-shrink-0"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zm-8-4a1 1 0 00-.993.883L9 7v4a1 1 0 001.993.117L11 11V7a1 1 0 00-1-1zm0 9a1.25 1.25 0 100-2.5A1.25 1.25 0 0010 15z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                       <div>{errors.service}</div>
                     </div>
@@ -420,7 +430,10 @@ export default function BookAppointmentPage() {
                     <button
                       onClick={() => {
                         if (!selectedService) {
-                          setErrors((p) => ({ ...p, service: "Please select a service to continue." }));
+                          setErrors((p) => ({
+                            ...p,
+                            service: "Please select a service to continue.",
+                          }));
                           return;
                         }
                         setErrors((p) => ({ ...p, service: undefined }));
@@ -680,7 +693,9 @@ export default function BookAppointmentPage() {
                               </div>
                             ))}
                             {errors.time && (
-                              <div className="mt-2 text-sm text-red-600">{errors.time}</div>
+                              <div className="mt-2 text-sm text-red-600">
+                                {errors.time}
+                              </div>
                             )}
                           </div>
                         </div>
@@ -712,7 +727,8 @@ export default function BookAppointmentPage() {
                           let hasError = false;
                           const newErrors: typeof errors = {};
                           if (!selectedVehicleType) {
-                            newErrors.vehicle = "Please select your vehicle type.";
+                            newErrors.vehicle =
+                              "Please select your vehicle type.";
                             hasError = true;
                           }
                           if (!selectedDate) {
@@ -720,14 +736,20 @@ export default function BookAppointmentPage() {
                             hasError = true;
                           }
                           if (!selectedTime) {
-                            newErrors.time = "Please choose an available time slot.";
+                            newErrors.time =
+                              "Please choose an available time slot.";
                             hasError = true;
                           }
                           if (hasError) {
                             setErrors((p) => ({ ...p, ...newErrors }));
                             return;
                           }
-                          setErrors((p) => ({ ...p, vehicle: undefined, date: undefined, time: undefined }));
+                          setErrors((p) => ({
+                            ...p,
+                            vehicle: undefined,
+                            date: undefined,
+                            time: undefined,
+                          }));
                           setCurrentStep(3);
                         }}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-full shadow-md flex items-center gap-2 transition-all"
@@ -811,7 +833,9 @@ export default function BookAppointmentPage() {
                             className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
                           />
                           {errors.fullName && (
-                            <div className="mt-2 text-sm text-red-600">{errors.fullName}</div>
+                            <div className="mt-2 text-sm text-red-600">
+                              {errors.fullName}
+                            </div>
                           )}
                         </div>
                       </div>
@@ -849,7 +873,9 @@ export default function BookAppointmentPage() {
                               className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
                             />
                             {errors.email && (
-                              <div className="mt-2 text-sm text-red-600">{errors.email}</div>
+                              <div className="mt-2 text-sm text-red-600">
+                                {errors.email}
+                              </div>
                             )}
                           </div>
                         </div>
@@ -885,7 +911,9 @@ export default function BookAppointmentPage() {
                               className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
                             />
                             {errors.phone && (
-                              <div className="mt-2 text-sm text-red-600">{errors.phone}</div>
+                              <div className="mt-2 text-sm text-red-600">
+                                {errors.phone}
+                              </div>
                             )}
                           </div>
                         </div>
@@ -974,20 +1002,33 @@ export default function BookAppointmentPage() {
                             hasError = true;
                           }
                           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                          if (!emailAddress.trim() || !emailRegex.test(emailAddress)) {
-                            newErrors.email = "Please provide a valid email address.";
+                          if (
+                            !emailAddress.trim() ||
+                            !emailRegex.test(emailAddress)
+                          ) {
+                            newErrors.email =
+                              "Please provide a valid email address.";
                             hasError = true;
                           }
                           const phoneRegex = /^[0-9+()\-\s]{7,}$/;
-                          if (!phoneNumber.trim() || !phoneRegex.test(phoneNumber)) {
-                            newErrors.phone = "Please provide a valid phone number.";
+                          if (
+                            !phoneNumber.trim() ||
+                            !phoneRegex.test(phoneNumber)
+                          ) {
+                            newErrors.phone =
+                              "Please provide a valid phone number.";
                             hasError = true;
                           }
                           if (hasError) {
                             setErrors((p) => ({ ...p, ...newErrors }));
                             return;
                           }
-                          setErrors((p) => ({ ...p, fullName: undefined, email: undefined, phone: undefined }));
+                          setErrors((p) => ({
+                            ...p,
+                            fullName: undefined,
+                            email: undefined,
+                            phone: undefined,
+                          }));
                           setCurrentStep(4);
                         }}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-full shadow-md flex items-center gap-2 transition-all"
