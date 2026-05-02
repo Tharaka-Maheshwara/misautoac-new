@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState } from 'react';
+import Link from "next/link";
+import { useState } from "react";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -9,10 +9,14 @@ interface LoginModalProps {
   onSwitchToSignup?: () => void;
 }
 
-export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginModalProps) {
+export default function LoginModal({
+  isOpen,
+  onClose,
+  onSwitchToSignup,
+}: LoginModalProps) {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     remember: false,
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -21,13 +25,13 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login data:', formData);
+    console.log("Login data:", formData);
     onClose();
   };
 
@@ -133,7 +137,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
               <input
                 id="password"
                 name="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 placeholder="••••••••"
                 value={formData.password}
@@ -194,10 +198,10 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
         <p className="mt-6 text-center text-slate-700">
           Don't have an account?{" "}
           <button
-              onClick={() => {
-                onClose();
-                onSwitchToSignup?.();
-              }}
+            onClick={() => {
+              onClose();
+              onSwitchToSignup?.();
+            }}
             className="font-semibold text-blue-600 hover:text-blue-500"
           >
             Sign Up

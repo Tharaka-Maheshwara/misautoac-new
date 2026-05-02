@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { useState } from "react";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     remember: false,
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -15,25 +15,21 @@ export default function LoginPage() {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle login logic here
-    console.log('Login data:', formData);
+    console.log("Login data:", formData);
   };
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700 px-4 py-16">
       <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl md:p-10">
-        <h1 className="text-3xl font-bold text-slate-900">
-          Welcome Back
-        </h1>
-        <p className="mt-2 text-slate-600">
-          Access your CoolDrive account
-        </p>
+        <h1 className="text-3xl font-bold text-slate-900">Welcome Back</h1>
+        <p className="mt-2 text-slate-600">Access your CoolDrive account</p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           {/* Email Field */}
@@ -104,7 +100,7 @@ export default function LoginPage() {
               <input
                 id="password"
                 name="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 placeholder="••••••••"
                 value={formData.password}

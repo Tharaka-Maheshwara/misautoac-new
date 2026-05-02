@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
+import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import SignupModal from '../forms/SignupModal';
-import LoginModal from '../forms/LoginModal';
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import SignupModal from "../forms/SignupModal";
+import LoginModal from "../forms/LoginModal";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -38,8 +38,12 @@ export default function Navbar() {
             />
           </div>
           <span className="leading-tight">
-            <span className="block text-2xl font-bold text-blue-700">Mist Auto</span>
-            <span className="block text-sm font-semibold text-blue-600">A/C Service</span>
+            <span className="block text-2xl font-bold text-blue-700">
+              Mist Auto
+            </span>
+            <span className="block text-sm font-semibold text-blue-600">
+              A/C Service
+            </span>
           </span>
         </Link>
 
@@ -80,22 +84,22 @@ export default function Navbar() {
           </button>
         </div>
 
-          <SignupModal 
-            isOpen={isSignupOpen} 
-            onClose={() => setIsSignupOpen(false)}
-            onSwitchToLogin={() => {
-              setIsSignupOpen(false);
-              setIsLoginOpen(true);
-            }}
-          />
-          <LoginModal 
-            isOpen={isLoginOpen} 
-            onClose={() => setIsLoginOpen(false)}
-            onSwitchToSignup={() => {
-              setIsLoginOpen(false);
-              setIsSignupOpen(true);
-            }}
-          />
+        <SignupModal
+          isOpen={isSignupOpen}
+          onClose={() => setIsSignupOpen(false)}
+          onSwitchToLogin={() => {
+            setIsSignupOpen(false);
+            setIsLoginOpen(true);
+          }}
+        />
+        <LoginModal
+          isOpen={isLoginOpen}
+          onClose={() => setIsLoginOpen(false)}
+          onSwitchToSignup={() => {
+            setIsLoginOpen(false);
+            setIsSignupOpen(true);
+          }}
+        />
       </div>
     </header>
   );

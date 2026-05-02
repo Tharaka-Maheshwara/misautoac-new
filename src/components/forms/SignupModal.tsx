@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState } from 'react';
+import Link from "next/link";
+import { useState } from "react";
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -9,13 +9,17 @@ interface SignupModalProps {
   onSwitchToLogin?: () => void;
 }
 
-export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: SignupModalProps) {
+export default function SignupModal({
+  isOpen,
+  onClose,
+  onSwitchToLogin,
+}: SignupModalProps) {
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
+    fullName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
     terms: false,
   });
 
@@ -23,14 +27,14 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }: Signup
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle signup logic here
-    console.log('Signup data:', formData);
+    console.log("Signup data:", formData);
     onClose();
   };
 
