@@ -409,230 +409,232 @@ export default function BookAppointmentPage() {
               )}
 
               <>
-                  {currentStep === 2 && (
-                    <>
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-bold text-gray-900">
-                          Your Vehicle
-                        </h2>
-                        <p className="text-sm text-gray-500">
-                          Select your vehicle type
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                      {vehicleTypes.map((t) => (
-                        <div
-                          key={t.id}
-                          onClick={() => setSelectedVehicleType(t.id)}
-                          className={`cursor-pointer rounded-xl border border-gray-200 p-4 flex flex-col items-center justify-center gap-2 transition-all ${
-                            selectedVehicleType === t.id
-                              ? "border-blue-500 bg-blue-50 text-blue-600"
-                              : "bg-white hover:border-gray-300 text-gray-700"
-                          }`}
-                        >
-                          <span className="text-2xl">{t.icon}</span>
-                          <span className="text-xs font-semibold">{t.id}</span>
+                {currentStep === 2 && (
+                  <>
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col">
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                            />
+                          </svg>
                         </div>
-                      ))}
-                    </div>
+                        <div>
+                          <h2 className="text-xl font-bold text-gray-900">
+                            Your Vehicle
+                          </h2>
+                          <p className="text-sm text-gray-500">
+                            Select your vehicle type
+                          </p>
+                        </div>
+                      </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Make / Model
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Toyota Camry"
-                          value={makeModel}
-                          onChange={(e) => setMakeModel(e.target.value)}
-                          className="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Year
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. 2021"
-                          value={year}
-                          onChange={(e) => setYear(e.target.value)}
-                          className="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-bold text-gray-900">
-                          Pick a Date & Time
-                        </h2>
-                        <p className="text-sm text-gray-500">
-                          Choose your preferred appointment slot
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row gap-6">
-                      <div className="w-full md:w-1/2">
-                        <p className="text-sm font-bold text-gray-800 mb-3">
-                          Preferred Date *
-                        </p>
-                        <div className="border border-gray-200 rounded-xl p-4 bg-white">
-                          <div className="flex justify-between items-center mb-4">
-                            <button className="p-1 hover:bg-gray-100 rounded text-gray-600">
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M15 19l-7-7 7-7"
-                                />
-                              </svg>
-                            </button>
-                            <span className="font-semibold text-sm text-gray-800">
-                              May 2026
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                        {vehicleTypes.map((t) => (
+                          <div
+                            key={t.id}
+                            onClick={() => setSelectedVehicleType(t.id)}
+                            className={`cursor-pointer rounded-xl border border-gray-200 p-4 flex flex-col items-center justify-center gap-2 transition-all ${
+                              selectedVehicleType === t.id
+                                ? "border-blue-500 bg-blue-50 text-blue-600"
+                                : "bg-white hover:border-gray-300 text-gray-700"
+                            }`}
+                          >
+                            <span className="text-2xl">{t.icon}</span>
+                            <span className="text-xs font-semibold">
+                              {t.id}
                             </span>
-                            <button className="p-1 hover:bg-gray-100 rounded text-gray-600">
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 5l7 7-7 7"
-                                />
-                              </svg>
-                            </button>
                           </div>
-                          <div className="grid grid-cols-7 gap-1 text-center mb-2">
-                            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(
-                              (d) => (
-                                <div
-                                  key={d}
-                                  className="text-[10px] uppercase font-bold text-gray-400"
-                                >
-                                  {d}
-                                </div>
-                              ),
-                            )}
-                          </div>
-                          <div className="grid grid-cols-7 gap-1 text-center">
-                            {Array.from({ length: 31 }, (_, i) => i + 1).map(
-                              (day) => (
-                                <div
-                                  key={day}
-                                  onClick={() => setSelectedDate(day)}
-                                  className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm cursor-pointer ${
-                                    selectedDate === day
-                                      ? "bg-blue-600 text-white font-bold shadow-md"
-                                      : day < 17
-                                        ? "text-gray-300 pointer-events-none"
-                                        : "hover:bg-blue-50 text-gray-700"
-                                  }`}
-                                >
-                                  {day}
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        </div>
+                        ))}
                       </div>
 
-                      <div className="w-full md:w-1/2">
-                        <p className="text-sm font-bold text-gray-800 mb-3">
-                          Available Times *
-                        </p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {[
-                            "8:00 AM",
-                            "9:00 AM",
-                            "10:00 AM",
-                            "11:00 AM",
-                            "12:00 PM",
-                            "1:00 PM",
-                            "2:00 PM",
-                            "3:00 PM",
-                            "4:00 PM",
-                            "5:00 PM",
-                          ].map((time) => (
-                            <div
-                              key={time}
-                              onClick={() => setSelectedTime(time)}
-                              className={`border rounded-lg p-2.5 text-center text-sm font-medium cursor-pointer transition-all flex items-center justify-center gap-1.5 ${
-                                selectedTime === time
-                                  ? "bg-blue-600 border-blue-600 text-white shadow-md"
-                                  : "border-gray-200 bg-white hover:border-blue-300 text-gray-700"
-                              }`}
-                            >
-                              <svg
-                                className="w-3.5 h-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                              {time}
-                            </div>
-                          ))}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Make / Model
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Toyota Camry"
+                            value={makeModel}
+                            onChange={(e) => setMakeModel(e.target.value)}
+                            className="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Year
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 2021"
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}
+                            className="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
+                          />
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex justify-between items-center mt-2">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col">
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-bold text-gray-900">
+                            Pick a Date & Time
+                          </h2>
+                          <p className="text-sm text-gray-500">
+                            Choose your preferred appointment slot
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col md:flex-row gap-6">
+                        <div className="w-full md:w-1/2">
+                          <p className="text-sm font-bold text-gray-800 mb-3">
+                            Preferred Date *
+                          </p>
+                          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                            <div className="flex justify-between items-center mb-4">
+                              <button className="p-1 hover:bg-gray-100 rounded text-gray-600">
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 19l-7-7 7-7"
+                                  />
+                                </svg>
+                              </button>
+                              <span className="font-semibold text-sm text-gray-800">
+                                May 2026
+                              </span>
+                              <button className="p-1 hover:bg-gray-100 rounded text-gray-600">
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 5l7 7-7 7"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                            <div className="grid grid-cols-7 gap-1 text-center mb-2">
+                              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(
+                                (d) => (
+                                  <div
+                                    key={d}
+                                    className="text-[10px] uppercase font-bold text-gray-400"
+                                  >
+                                    {d}
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                            <div className="grid grid-cols-7 gap-1 text-center">
+                              {Array.from({ length: 31 }, (_, i) => i + 1).map(
+                                (day) => (
+                                  <div
+                                    key={day}
+                                    onClick={() => setSelectedDate(day)}
+                                    className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm cursor-pointer ${
+                                      selectedDate === day
+                                        ? "bg-blue-600 text-white font-bold shadow-md"
+                                        : day < 17
+                                          ? "text-gray-300 pointer-events-none"
+                                          : "hover:bg-blue-50 text-gray-700"
+                                    }`}
+                                  >
+                                    {day}
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="w-full md:w-1/2">
+                          <p className="text-sm font-bold text-gray-800 mb-3">
+                            Available Times *
+                          </p>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              "8:00 AM",
+                              "9:00 AM",
+                              "10:00 AM",
+                              "11:00 AM",
+                              "12:00 PM",
+                              "1:00 PM",
+                              "2:00 PM",
+                              "3:00 PM",
+                              "4:00 PM",
+                              "5:00 PM",
+                            ].map((time) => (
+                              <div
+                                key={time}
+                                onClick={() => setSelectedTime(time)}
+                                className={`border rounded-lg p-2.5 text-center text-sm font-medium cursor-pointer transition-all flex items-center justify-center gap-1.5 ${
+                                  selectedTime === time
+                                    ? "bg-blue-600 border-blue-600 text-white shadow-md"
+                                    : "border-gray-200 bg-white hover:border-blue-300 text-gray-700"
+                                }`}
+                              >
+                                <svg
+                                  className="w-3.5 h-3.5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                  />
+                                </svg>
+                                {time}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-2">
                       <button
                         onClick={() => setCurrentStep(1)}
                         className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-6 rounded-full transition-all flex items-center gap-2"
@@ -672,151 +674,228 @@ export default function BookAppointmentPage() {
                         </svg>
                       </button>
                     </div>
-                </>
-                  )}
+                  </>
+                )}
 
-                  {activeStep === 3 && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col">
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                            />
-                          </svg>
-                        </div>
-                        <div>
-                          <h2 className="text-xl font-bold text-gray-900">
-                            Personal Information
-                          </h2>
-                          <p className="text-sm text-gray-500">
-                            We&apos;ll use this to confirm your booking
-                          </p>
+                {activeStep === 3 && (
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-gray-900">
+                          Personal Information
+                        </h2>
+                        <p className="text-sm text-gray-500">
+                          We&apos;ll use this to confirm your booking
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-5">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-2">
+                          Full Name <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                              />
+                            </svg>
+                          </span>
+                          <input
+                            type="text"
+                            placeholder="John Doe"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
+                          />
                         </div>
                       </div>
 
-                      <div className="space-y-5">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-semibold text-gray-900 mb-2">
-                            Full Name <span className="text-red-500">*</span>
+                            Email Address{" "}
+                            <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                />
                               </svg>
                             </span>
                             <input
-                              type="text"
-                              placeholder="John Doe"
-                              value={fullName}
-                              onChange={(e) => setFullName(e.target.value)}
+                              type="email"
+                              placeholder="john@example.com"
+                              value={emailAddress}
+                              onChange={(e) => setEmailAddress(e.target.value)}
                               className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
                             />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-semibold text-gray-900 mb-2">
-                              Email Address <span className="text-red-500">*</span>
-                            </label>
-                            <div className="relative">
-                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                              </span>
-                              <input
-                                type="email"
-                                placeholder="john@example.com"
-                                value={emailAddress}
-                                onChange={(e) => setEmailAddress(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-semibold text-gray-900 mb-2">
-                              Phone Number <span className="text-red-500">*</span>
-                            </label>
-                            <div className="relative">
-                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h2.28a1 1 0 01.948.684l1.518 4.55a1 1 0 01-.272 1.03L8.27 10.728a11.042 11.042 0 005.452 5.452l1.464-1.204a1 1 0 011.03-.272l4.55 1.518a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C10.297 21 3 13.703 3 5V5z" />
-                                </svg>
-                              </span>
-                              <input
-                                type="tel"
-                                placeholder="+1 (234) 567-890"
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
-                              />
-                            </div>
-                          </div>
-                        </div>
-
                         <div>
                           <label className="block text-sm font-semibold text-gray-900 mb-2">
-                            Additional Notes <span className="text-gray-500 font-normal">(Optional)</span>
+                            Phone Number <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
-                            <span className="absolute left-4 top-4 text-gray-400 pointer-events-none">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h6m-8 8h12a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M3 5a2 2 0 012-2h2.28a1 1 0 01.948.684l1.518 4.55a1 1 0 01-.272 1.03L8.27 10.728a11.042 11.042 0 005.452 5.452l1.464-1.204a1 1 0 011.03-.272l4.55 1.518a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C10.297 21 3 13.703 3 5V5z"
+                                />
                               </svg>
                             </span>
-                            <textarea
-                              placeholder="Any specific concerns or requirements..."
-                              value={additionalNotes}
-                              onChange={(e) => setAdditionalNotes(e.target.value)}
-                              rows={4}
-                              className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400 resize-none"
+                            <input
+                              type="tel"
+                              placeholder="+1 (234) 567-890"
+                              value={phoneNumber}
+                              onChange={(e) => setPhoneNumber(e.target.value)}
+                              className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
                             />
                           </div>
                         </div>
                       </div>
 
-                      <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800 flex items-start gap-3">
-                        <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 18a6 6 0 100-12 6 6 0 000 12z" />
-                        </svg>
-                        <p>Your information is kept private and secure. We only use it to manage your appointment and send relevant updates.</p>
-                      </div>
-
-                      <div className="mt-8 flex justify-between items-center">
-                        <button
-                          onClick={() => setCurrentStep(2)}
-                          className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-6 rounded-full transition-all flex items-center gap-2"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                          </svg>
-                          Back
-                        </button>
-                        <button
-                          onClick={() => setCurrentStep(4)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-full shadow-md flex items-center gap-2 transition-all"
-                        >
-                          Review Booking
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-2">
+                          Additional Notes{" "}
+                          <span className="text-gray-500 font-normal">
+                            (Optional)
+                          </span>
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-4 top-4 text-gray-400 pointer-events-none">
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M7 8h10M7 12h6m-8 8h12a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
+                            </svg>
+                          </span>
+                          <textarea
+                            placeholder="Any specific concerns or requirements..."
+                            value={additionalNotes}
+                            onChange={(e) => setAdditionalNotes(e.target.value)}
+                            rows={4}
+                            className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400 resize-none"
+                          />
+                        </div>
                       </div>
                     </div>
-                  )}
-                </>
+
+                    <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800 flex items-start gap-3">
+                      <svg
+                        className="w-4 h-4 mt-0.5 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M12 18a6 6 0 100-12 6 6 0 000 12z"
+                        />
+                      </svg>
+                      <p>
+                        Your information is kept private and secure. We only use
+                        it to manage your appointment and send relevant updates.
+                      </p>
+                    </div>
+
+                    <div className="mt-8 flex justify-between items-center">
+                      <button
+                        onClick={() => setCurrentStep(2)}
+                        className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-6 rounded-full transition-all flex items-center gap-2"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 19l-7-7 7-7"
+                          />
+                        </svg>
+                        Back
+                      </button>
+                      <button
+                        onClick={() => setCurrentStep(4)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-full shadow-md flex items-center gap-2 transition-all"
+                      >
+                        Review Booking
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             </div>
 
             {/* Right Container: Summary */}
@@ -962,7 +1041,9 @@ export default function BookAppointmentPage() {
                       <p className="text-xs font-semibold text-gray-400 mb-0.5 uppercase tracking-wide">
                         Name
                       </p>
-                      <p className="text-sm font-semibold text-gray-900">{fullName || "—"}</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {fullName || "—"}
+                      </p>
                     </div>
                   </div>
 
