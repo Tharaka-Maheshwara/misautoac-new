@@ -1823,45 +1823,55 @@ export default function BookAppointmentPage() {
               </p>
             </div>
 
-            {/* Action Button */}
-            <button
-              onClick={() => {
-                setShowConfirmation(false);
-                setCurrentStep(1);
-                setSelectedService(null);
-                setSelectedVehicleType("Electric");
-                setMakeModel("");
-                setYear("");
-                setFullName("");
-                setEmailAddress("");
-                setPhoneNumber("");
-                setAdditionalNotes("");
-                setSelectedDate(null);
-                setSelectedTime(null);
-              }}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full transition-all"
-            >
-              Book Another Appointment
-            </button>
-            <button
-              onClick={() => {
-                setShowConfirmation(false);
-                setCurrentStep(1);
-                setSelectedService(null);
-                setSelectedVehicleType("Electric");
-                setMakeModel("");
-                setYear("");
-                setFullName("");
-                setEmailAddress("");
-                setPhoneNumber("");
-                setAdditionalNotes("");
-                setSelectedDate(null);
-                setSelectedTime(null);
-              }}
-              className="w-full mt-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-full transition-all"
-            >
-              Close
-            </button>
+            {/* Action Buttons: primary + clear Close (side-by-side for clarity) */}
+            <div className="mt-4 flex gap-3">
+              <button
+                onClick={() => {
+                  setShowConfirmation(false);
+                  setCurrentStep(1);
+                  setSelectedService(null);
+                  setSelectedVehicleType("Electric");
+                  setMakeModel("");
+                  setYear("");
+                  setFullName("");
+                  setEmailAddress("");
+                  setPhoneNumber("");
+                  setAdditionalNotes("");
+                  setSelectedDate(null);
+                  setSelectedTime(null);
+                }}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14m7-7H5" />
+                </svg>
+                Book Another Appointment
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowConfirmation(false);
+                  setCurrentStep(1);
+                  setSelectedService(null);
+                  setSelectedVehicleType("Electric");
+                  setMakeModel("");
+                  setYear("");
+                  setFullName("");
+                  setEmailAddress("");
+                  setPhoneNumber("");
+                  setAdditionalNotes("");
+                  setSelectedDate(null);
+                  setSelectedTime(null);
+                }}
+                className="flex-1 bg-white border-2 border-blue-200 hover:border-blue-300 text-blue-600 font-medium py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2"
+                aria-label="Close and reset form"
+              >
+                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
