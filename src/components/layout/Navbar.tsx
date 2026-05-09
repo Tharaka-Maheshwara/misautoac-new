@@ -61,14 +61,22 @@ export default function Navbar() {
             : "bg-white border-b border-slate-200"
         }`}
       >
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 py-2">
+        <div
+          className={`mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+            isScrolled ? "py-2" : "py-4"
+          }`}
+        >
           {/* ===== LEFT: Logo & Name ===== */}
           <Link
             href="/"
             className="flex items-center gap-2.5 shrink-0"
             aria-label="Mist Auto A/C - Home"
           >
-            <div className="relative h-12 w-12 sm:h-14 sm:w-14 overflow-hidden rounded-full ring-2 ring-blue-100">
+            <div
+              className={`relative overflow-hidden rounded-full ring-2 ring-blue-100 transition-all duration-300 ${
+                isScrolled ? "h-12 w-12 sm:h-14 sm:w-14" : "h-16 w-16 sm:h-20 sm:w-20"
+              }`}
+            >
               <Image
                 src="/logo/mist-auto-logo.jpeg"
                 alt="Mist Auto A/C Logo"
@@ -77,11 +85,19 @@ export default function Navbar() {
                 priority
               />
             </div>
-            <span className="leading-tight">
-              <span className="block text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+            <span className="leading-tight transition-all duration-300">
+              <span
+                className={`block font-bold text-slate-900 tracking-tight transition-all duration-300 ${
+                  isScrolled ? "text-lg sm:text-xl" : "text-xl sm:text-2xl"
+                }`}
+              >
                 Mist Auto
               </span>
-              <span className="block text-xs font-semibold text-blue-600 tracking-wide uppercase">
+              <span
+                className={`block font-semibold text-blue-600 tracking-wide uppercase transition-all duration-300 ${
+                  isScrolled ? "text-xs" : "text-sm"
+                }`}
+              >
                 A/C Service
               </span>
             </span>
@@ -99,7 +115,7 @@ export default function Navbar() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className={`relative block rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                      className={`relative block rounded-lg px-4 py-2 text-base font-medium transition-all duration-200 ${
                         isActive
                           ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                           : "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
@@ -117,13 +133,13 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-2 shrink-0">
             <button
               onClick={() => setIsLoginOpen(true)}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
+              className="rounded-lg px-4 py-2 text-base font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
             >
               Login
             </button>
             <button
               onClick={() => setIsSignupOpen(true)}
-              className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-200 transition-all duration-200 hover:bg-blue-700 hover:shadow-md hover:shadow-blue-300 active:scale-95"
+              className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2 text-base font-semibold text-white shadow-sm shadow-blue-200 transition-all duration-200 hover:bg-blue-700 hover:shadow-md hover:shadow-blue-300 active:scale-95"
             >
               Sign Up
             </button>
@@ -201,7 +217,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                className={`flex items-center rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
                   isActive
                     ? "bg-blue-600 text-white shadow-md"
                     : "text-slate-700 hover:bg-blue-50 hover:text-blue-700"
@@ -223,7 +239,7 @@ export default function Navbar() {
               setIsMobileMenuOpen(false);
               setIsLoginOpen(true);
             }}
-            className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300"
+            className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300"
           >
             Login
           </button>
@@ -232,7 +248,7 @@ export default function Navbar() {
               setIsMobileMenuOpen(false);
               setIsSignupOpen(true);
             }}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 active:scale-95"
+            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 active:scale-95"
           >
             Sign Up
           </button>
@@ -240,7 +256,7 @@ export default function Navbar() {
       </nav>
 
       {/* ===== SPACER (pushes content below fixed navbar) ===== */}
-      <div className="h-16 sm:h-[72px]" />
+      <div className="h-24 sm:h-[112px]" />
 
       {/* ===== MODALS ===== */}
       <SignupModal
