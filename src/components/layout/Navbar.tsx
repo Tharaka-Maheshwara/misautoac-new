@@ -20,7 +20,10 @@ const sparePartsDropdownItems = [
   { label: "Room AC", href: "/pages/spare-parts/room-ac" },
   { label: "Refrigerator", href: "/pages/spare-parts/refrigerator" },
   { label: "Washing Machine", href: "/pages/spare-parts/washing-machine" },
-  { label: "Refrigerant & Accessories", href: "/pages/spare-parts/refrigerant" },
+  {
+    label: "Refrigerant & Accessories",
+    href: "/pages/spare-parts/refrigerant",
+  },
 ];
 
 export default function Navbar() {
@@ -29,15 +32,15 @@ export default function Navbar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  
+
   // Dropdown states for Services
   const [isServicesDesktopOpen, setIsServicesDesktopOpen] = useState(false);
   const [isServicesMobileOpen, setIsServicesMobileOpen] = useState(false);
-  
+
   // Dropdown states for Spare Parts
   const [isSparePartsDesktopOpen, setIsSparePartsDesktopOpen] = useState(false);
   const [isSparePartsMobileOpen, setIsSparePartsMobileOpen] = useState(false);
-  
+
   const closeServicesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const closeSparePartsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -77,7 +80,8 @@ export default function Navbar() {
 
   // Hover delay handling for Services dropdown
   const handleServicesMouseEnter = () => {
-    if (closeServicesTimeoutRef.current) clearTimeout(closeServicesTimeoutRef.current);
+    if (closeServicesTimeoutRef.current)
+      clearTimeout(closeServicesTimeoutRef.current);
     setIsServicesDesktopOpen(true);
   };
 
@@ -89,7 +93,8 @@ export default function Navbar() {
 
   // Hover delay handling for Spare Parts dropdown
   const handleSparePartsMouseEnter = () => {
-    if (closeSparePartsTimeoutRef.current) clearTimeout(closeSparePartsTimeoutRef.current);
+    if (closeSparePartsTimeoutRef.current)
+      clearTimeout(closeSparePartsTimeoutRef.current);
     setIsSparePartsDesktopOpen(true);
   };
 
@@ -121,7 +126,9 @@ export default function Navbar() {
           >
             <div
               className={`relative overflow-hidden rounded-full ring-2 ring-blue-100 transition-all duration-300 ${
-                isScrolled ? "h-12 w-12 sm:h-14 sm:w-14" : "h-16 w-16 sm:h-20 sm:w-20"
+                isScrolled
+                  ? "h-12 w-12 sm:h-14 sm:w-14"
+                  : "h-16 w-16 sm:h-20 sm:w-20"
               }`}
             >
               <Image
@@ -151,9 +158,11 @@ export default function Navbar() {
           </Link>
 
           {/* ===== CENTER: Navigation Links (Desktop) ===== */}
-          <nav aria-label="Primary navigation" className="hidden lg:flex items-center">
+          <nav
+            aria-label="Primary navigation"
+            className="hidden lg:flex items-center"
+          >
             <ul className="flex items-center gap-1">
-              
               {/* 1. Home Link */}
               <li>
                 <Link
@@ -192,7 +201,11 @@ export default function Navbar() {
                     stroke="currentColor"
                     strokeWidth={2.5}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
 
@@ -257,7 +270,11 @@ export default function Navbar() {
                     stroke="currentColor"
                     strokeWidth={2.5}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
 
@@ -297,7 +314,6 @@ export default function Navbar() {
                   Contact
                 </Link>
               </li>
-
             </ul>
           </nav>
 
@@ -348,7 +364,9 @@ export default function Navbar() {
       {/* ===== MOBILE MENU OVERLAY ===== */}
       <div
         className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
-          isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          isMobileMenuOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setIsMobileMenuOpen(false)}
         aria-hidden="true"
@@ -369,20 +387,31 @@ export default function Navbar() {
             className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
             aria-label="Close menu"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
 
         {/* Drawer Nav Links */}
         <div className="flex flex-col gap-1 px-4 py-4">
-          
           {/* Home */}
           <Link
             href="/"
             className={`flex items-center rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
-              pathname === "/" ? "bg-blue-600 text-white shadow-md" : "text-slate-700 hover:bg-blue-50"
+              pathname === "/"
+                ? "bg-blue-600 text-white shadow-md"
+                : "text-slate-700 hover:bg-blue-50"
             }`}
           >
             Home
@@ -408,14 +437,20 @@ export default function Navbar() {
                 stroke="currentColor"
                 strokeWidth={2.5}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
 
             {/* Services Mobile Submenu Items */}
             <div
               className={`overflow-hidden transition-all duration-300 ${
-                isServicesMobileOpen ? "max-h-60 opacity-100 mt-1 pl-4" : "max-h-0 opacity-0 pointer-events-none"
+                isServicesMobileOpen
+                  ? "max-h-60 opacity-100 mt-1 pl-4"
+                  : "max-h-0 opacity-0 pointer-events-none"
               }`}
             >
               <ul className="flex flex-col gap-1 border-l-2 border-slate-100 pl-2">
@@ -437,7 +472,9 @@ export default function Navbar() {
           <Link
             href="/pages/about"
             className={`flex items-center rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
-              pathname === "/pages/about" ? "bg-blue-600 text-white shadow-md" : "text-slate-700 hover:bg-blue-50"
+              pathname === "/pages/about"
+                ? "bg-blue-600 text-white shadow-md"
+                : "text-slate-700 hover:bg-blue-50"
             }`}
           >
             About Us
@@ -463,14 +500,20 @@ export default function Navbar() {
                 stroke="currentColor"
                 strokeWidth={2.5}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
 
             {/* Spare Parts Mobile Submenu Items */}
             <div
               className={`overflow-hidden transition-all duration-300 ${
-                isSparePartsMobileOpen ? "max-h-72 opacity-100 mt-1 pl-4" : "max-h-0 opacity-0 pointer-events-none"
+                isSparePartsMobileOpen
+                  ? "max-h-72 opacity-100 mt-1 pl-4"
+                  : "max-h-0 opacity-0 pointer-events-none"
               }`}
             >
               <ul className="flex flex-col gap-1 border-l-2 border-slate-100 pl-2">
@@ -492,12 +535,13 @@ export default function Navbar() {
           <Link
             href="/pages/contact"
             className={`flex items-center rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
-              pathname === "/pages/contact" ? "bg-blue-600 text-white shadow-md" : "text-slate-700 hover:bg-blue-50"
+              pathname === "/pages/contact"
+                ? "bg-blue-600 text-white shadow-md"
+                : "text-slate-700 hover:bg-blue-50"
             }`}
           >
             Contact
           </Link>
-
         </div>
 
         {/* Drawer Divider */}
