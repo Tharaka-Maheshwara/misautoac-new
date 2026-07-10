@@ -22,7 +22,7 @@ const sparePartsDropdownItems = [
   { label: "Washing Machine", href: "/pages/spare-parts/washing-machine" },
   {
     label: "Refrigerant & Accessories",
-    href: "/pages/spare-parts/refrigerant",
+    href: "/pages/spare-parts/refrigerant-and-accessories",
   },
 ];
 
