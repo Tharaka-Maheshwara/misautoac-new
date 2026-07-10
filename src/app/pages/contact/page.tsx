@@ -118,7 +118,7 @@ export default function ContactPage() {
               <div className="space-y-8">
                 {/* Location */}
                 <div className="flex items-start">
-                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 flex-shrink-0">
+                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 shrink-0">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -150,7 +150,7 @@ export default function ContactPage() {
 
                 {/* Phone */}
                 <div className="flex items-start">
-                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 flex-shrink-0">
+                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 shrink-0">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -174,7 +174,7 @@ export default function ContactPage() {
 
                 {/* Email */}
                 <div className="flex items-start">
-                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 flex-shrink-0">
+                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 shrink-0">
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -198,7 +198,7 @@ export default function ContactPage() {
 
                 {/* Working Hours */}
                 <div className="flex items-start">
-                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 flex-shrink-0">
+                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 shrink-0">
                     <svg
                       className="w-5 h-5"
                       fill="none"

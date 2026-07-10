@@ -324,20 +324,20 @@ export default function Navbar() {
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
           >
-            <div className="flex flex-col items-center justify-center gap-[5px]">
+            <div className="flex flex-col items-center justify-center gap-1.25">
               <span
-                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-300 origin-center ${
-                  isMobileMenuOpen ? "rotate-45 translate-y-[7px]" : ""
+                className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 origin-center ${
+                  isMobileMenuOpen ? "rotate-45 translate-y-1.75" : ""
                 }`}
               />
               <span
-                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-300 ${
+                className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
                   isMobileMenuOpen ? "opacity-0 scale-0" : ""
                 }`}
               />
               <span
-                className={`block h-[2px] w-5 rounded-full bg-current transition-all duration-300 origin-center ${
-                  isMobileMenuOpen ? "-rotate-45 -translate-y-[7px]" : ""
+                className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 origin-center ${
+                  isMobileMenuOpen ? "-rotate-45 -translate-y-1.75" : ""
                 }`}
               />
             </div>
@@ -527,7 +527,7 @@ export default function Navbar() {
       </nav>
 
       {/* ===== SPACER ===== */}
-      <div className="h-24 sm:h-[112px]" />
+      <div className="h-24 sm:h-28" />
 
       {/* ===== MODALS ===== */}
       <SignupModal
