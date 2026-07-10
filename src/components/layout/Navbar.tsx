@@ -7,18 +7,20 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import SignupModal from "../forms/SignupModal";
 import LoginModal from "../forms/LoginModal";
 
-const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "About Us", href: "/pages/about" },
-  { label: "Spare Parts", href: "/pages/spare-parts" },
-  { label: "Contact", href: "/pages/contact" },
-];
-
+// Dropdown Items Data
 const serviceDropdownItems = [
   { label: "Auto AC", href: "/pages/services/auto-ac" },
   { label: "Refrigerator", href: "/pages/services/refrigerator" },
   { label: "Washing Machine", href: "/pages/services/washing-machine" },
   { label: "Industrial", href: "/pages/services/industrial" },
+];
+
+const sparePartsDropdownItems = [
+  { label: "Auto AC", href: "/pages/spare-parts/auto-ac" },
+  { label: "Room AC", href: "/pages/spare-parts/room-ac" },
+  { label: "Refrigerator", href: "/pages/spare-parts/refrigerator" },
+  { label: "Washing Machine", href: "/pages/spare-parts/washing-machine" },
+  { label: "Refrigerant & Accessories", href: "/pages/spare-parts/refrigerant" },
 ];
 
 export default function Navbar() {
@@ -28,11 +30,16 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   
-  // Dropdown states
+  // Dropdown states for Services
   const [isServicesDesktopOpen, setIsServicesDesktopOpen] = useState(false);
   const [isServicesMobileOpen, setIsServicesMobileOpen] = useState(false);
   
-  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Dropdown states for Spare Parts
+  const [isSparePartsDesktopOpen, setIsSparePartsDesktopOpen] = useState(false);
+  const [isSparePartsMobileOpen, setIsSparePartsMobileOpen] = useState(false);
+  
+  const closeServicesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const closeSparePartsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Track scroll position for sticky effect
   useEffect(() => {
@@ -43,11 +50,13 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
+  // Close mobile menu and dropdowns on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsServicesMobileOpen(false);
     setIsServicesDesktopOpen(false);
+    setIsSparePartsMobileOpen(false);
+    setIsSparePartsDesktopOpen(false);
   }, [pathname]);
 
   // Lock body scroll when mobile menu is open
@@ -66,16 +75,28 @@ export default function Navbar() {
     setIsMobileMenuOpen((prev) => !prev);
   }, []);
 
-  // Smooth hover delay handling for desktop dropdown
-  const handleMouseEnter = () => {
-    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+  // Hover delay handling for Services dropdown
+  const handleServicesMouseEnter = () => {
+    if (closeServicesTimeoutRef.current) clearTimeout(closeServicesTimeoutRef.current);
     setIsServicesDesktopOpen(true);
   };
 
-  const handleMouseLeave = () => {
-    closeTimeoutRef.current = setTimeout(() => {
+  const handleServicesMouseLeave = () => {
+    closeServicesTimeoutRef.current = setTimeout(() => {
       setIsServicesDesktopOpen(false);
-    }, 150); // Small grace period before closing
+    }, 150);
+  };
+
+  // Hover delay handling for Spare Parts dropdown
+  const handleSparePartsMouseEnter = () => {
+    if (closeSparePartsTimeoutRef.current) clearTimeout(closeSparePartsTimeoutRef.current);
+    setIsSparePartsDesktopOpen(true);
+  };
+
+  const handleSparePartsMouseLeave = () => {
+    closeSparePartsTimeoutRef.current = setTimeout(() => {
+      setIsSparePartsDesktopOpen(false);
+    }, 150);
   };
 
   return (
@@ -132,7 +153,8 @@ export default function Navbar() {
           {/* ===== CENTER: Navigation Links (Desktop) ===== */}
           <nav aria-label="Primary navigation" className="hidden lg:flex items-center">
             <ul className="flex items-center gap-1">
-              {/* Home Link */}
+              
+              {/* 1. Home Link */}
               <li>
                 <Link
                   href="/"
@@ -146,11 +168,11 @@ export default function Navbar() {
                 </Link>
               </li>
 
-              {/* Services Dropdown Link */}
+              {/* 2. Services Dropdown Link */}
               <li
                 className="relative"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+                onMouseEnter={handleServicesMouseEnter}
+                onMouseLeave={handleServicesMouseLeave}
               >
                 <button
                   type="button"
@@ -174,7 +196,7 @@ export default function Navbar() {
                   </svg>
                 </button>
 
-                {/* Dropdown Menu Overlay Panel */}
+                {/* Services Dropdown Menu Overlay */}
                 <div
                   className={`absolute left-0 mt-2 w-64 rounded-xl bg-white p-3 shadow-xl border border-slate-100 transition-all duration-200 origin-top ${
                     isServicesDesktopOpen
@@ -197,24 +219,85 @@ export default function Navbar() {
                 </div>
               </li>
 
-              {/* Remaining Static Links */}
-              {navLinks.slice(1).map((link) => {
-                const isActive = pathname === link.href;
-                return (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className={`relative block rounded-lg px-4 py-2 text-base font-medium transition-all duration-200 ${
-                        isActive
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                          : "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                );
-              })}
+              {/* 3. About Us Link */}
+              <li>
+                <Link
+                  href="/pages/about"
+                  className={`relative block rounded-lg px-4 py-2 text-base font-medium transition-all duration-200 ${
+                    pathname === "/pages/about"
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                      : "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
+                  }`}
+                >
+                  About Us
+                </Link>
+              </li>
+
+              {/* 4. Spare Parts Dropdown Link */}
+              <li
+                className="relative"
+                onMouseEnter={handleSparePartsMouseEnter}
+                onMouseLeave={handleSparePartsMouseLeave}
+              >
+                <button
+                  type="button"
+                  className={`flex items-center gap-1 rounded-lg px-4 py-2 text-base font-medium transition-all duration-200 ${
+                    pathname.startsWith("/pages/spare-parts")
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                      : "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
+                  }`}
+                >
+                  <span>Spare Parts</span>
+                  <svg
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      isSparePartsDesktopOpen ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Spare Parts Dropdown Menu Overlay */}
+                <div
+                  className={`absolute left-0 mt-2 w-72 rounded-xl bg-white p-3 shadow-xl border border-slate-100 transition-all duration-200 origin-top ${
+                    isSparePartsDesktopOpen
+                      ? "opacity-100 scale-100 pointer-events-auto visibility-visible"
+                      : "opacity-0 scale-95 pointer-events-none visibility-hidden"
+                  }`}
+                >
+                  <ul className="flex flex-col gap-1">
+                    {sparePartsDropdownItems.map((item) => (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          className="block rounded-lg px-4 py-2.5 text-[15px] font-bold text-slate-800 transition-colors duration-150 hover:bg-slate-50 hover:text-blue-600"
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+
+              {/* 5. Contact Link */}
+              <li>
+                <Link
+                  href="/pages/contact"
+                  className={`relative block rounded-lg px-4 py-2 text-base font-medium transition-all duration-200 ${
+                    pathname === "/pages/contact"
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                      : "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
+                  }`}
+                >
+                  Contact
+                </Link>
+              </li>
+
             </ul>
           </nav>
 
@@ -294,6 +377,7 @@ export default function Navbar() {
 
         {/* Drawer Nav Links */}
         <div className="flex flex-col gap-1 px-4 py-4">
+          
           {/* Home */}
           <Link
             href="/"
@@ -328,7 +412,7 @@ export default function Navbar() {
               </svg>
             </button>
 
-            {/* Mobile Submenu Items */}
+            {/* Services Mobile Submenu Items */}
             <div
               className={`overflow-hidden transition-all duration-300 ${
                 isServicesMobileOpen ? "max-h-60 opacity-100 mt-1 pl-4" : "max-h-0 opacity-0 pointer-events-none"
@@ -349,21 +433,71 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Static Links */}
-          {navLinks.slice(1).map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`flex items-center rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
-                  isActive ? "bg-blue-600 text-white shadow-md" : "text-slate-700 hover:bg-blue-50"
+          {/* About Us */}
+          <Link
+            href="/pages/about"
+            className={`flex items-center rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
+              pathname === "/pages/about" ? "bg-blue-600 text-white shadow-md" : "text-slate-700 hover:bg-blue-50"
+            }`}
+          >
+            About Us
+          </Link>
+
+          {/* Spare Parts Accordion Toggle */}
+          <div>
+            <button
+              onClick={() => setIsSparePartsMobileOpen((prev) => !prev)}
+              className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
+                pathname.startsWith("/pages/spare-parts")
+                  ? "bg-slate-100 text-blue-700 font-semibold"
+                  : "text-slate-700 hover:bg-blue-50"
+              }`}
+            >
+              <span>Spare Parts</span>
+              <svg
+                className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${
+                  isSparePartsMobileOpen ? "rotate-180" : ""
                 }`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
               >
-                {link.label}
-              </Link>
-            );
-          })}
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Spare Parts Mobile Submenu Items */}
+            <div
+              className={`overflow-hidden transition-all duration-300 ${
+                isSparePartsMobileOpen ? "max-h-72 opacity-100 mt-1 pl-4" : "max-h-0 opacity-0 pointer-events-none"
+              }`}
+            >
+              <ul className="flex flex-col gap-1 border-l-2 border-slate-100 pl-2">
+                {sparePartsDropdownItems.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className="block rounded-md px-4 py-2 text-[15px] font-bold text-slate-700 hover:bg-slate-50 hover:text-blue-600"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Contact */}
+          <Link
+            href="/pages/contact"
+            className={`flex items-center rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
+              pathname === "/pages/contact" ? "bg-blue-600 text-white shadow-md" : "text-slate-700 hover:bg-blue-50"
+            }`}
+          >
+            Contact
+          </Link>
+
         </div>
 
         {/* Drawer Divider */}
