@@ -6,6 +6,9 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import SignupModal from "../forms/SignupModal";
 import LoginModal from "../forms/LoginModal";
+import { useAuth } from "@/context/AuthContext"; // Import useAuth
+import { auth } from "@/lib/firebase"; // Import auth
+import { signOut } from "firebase/auth"; // Import signOut
 
 // Dropdown Items Data
 const serviceDropdownItems = [
@@ -28,6 +31,7 @@ const sparePartsDropdownItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { user } = useAuth(); // Get user from AuthContext
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -43,6 +47,15 @@ export default function Navbar() {
 
   const closeServicesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const closeSparePartsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // Auth state will be updated by onAuthStateChanged in AuthProvider
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
+  };
 
   // Track scroll position for sticky effect
   useEffect(() => {
@@ -319,18 +332,34 @@ export default function Navbar() {
 
           {/* ===== RIGHT: Auth Buttons (Desktop) ===== */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => setIsLoginOpen(true)}
-              className="rounded-lg px-4 py-2 text-base font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => setIsSignupOpen(true)}
-              className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2 text-base font-semibold text-white shadow-sm shadow-blue-200 transition-all duration-200 hover:bg-blue-700 hover:shadow-md hover:shadow-blue-300 active:scale-95"
-            >
-              Sign Up
-            </button>
+            {user ? (
+              <>
+                <span className="text-sm text-slate-600 mr-2 hidden sm:block">
+                  {user.email}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="rounded-lg px-4 py-2 text-base font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setIsLoginOpen(true)}
+                  className="rounded-lg px-4 py-2 text-base font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => setIsSignupOpen(true)}
+                  className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2 text-base font-semibold text-white shadow-sm shadow-blue-200 transition-all duration-200 hover:bg-blue-700 hover:shadow-md hover:shadow-blue-300 active:scale-95"
+                >
+                  Sign Up
+                </button>
+              </>
+            )}
           </div>
 
           {/* ===== HAMBURGER BUTTON (Mobile / Tablet) ===== */}
@@ -549,24 +578,38 @@ export default function Navbar() {
 
         {/* Drawer Auth Buttons */}
         <div className="flex flex-col gap-2 px-4 py-4">
-          <button
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              setIsLoginOpen(true);
-            }}
-            className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300"
-          >
-            Login
-          </button>
-          <button
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              setIsSignupOpen(true);
-            }}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 active:scale-95"
-          >
-            Sign Up
-          </button>
+          {user ? (
+            <button
+              onClick={() => {
+                handleLogout();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-100 hover:border-slate-300"
+            >
+              Logout ({user.email})
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsLoginOpen(true);
+                }}
+                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsSignupOpen(true);
+                }}
+                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 active:scale-95"
+              >
+                Sign Up
+              </button>
+            </>
+          )}
         </div>
       </nav>
 
@@ -574,22 +617,26 @@ export default function Navbar() {
       <div className="h-24 sm:h-28" />
 
       {/* ===== MODALS ===== */}
-      <SignupModal
-        isOpen={isSignupOpen}
-        onClose={() => setIsSignupOpen(false)}
-        onSwitchToLogin={() => {
-          setIsSignupOpen(false);
-          setIsLoginOpen(true);
-        }}
-      />
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onSwitchToSignup={() => {
-          setIsLoginOpen(false);
-          setIsSignupOpen(true);
-        }}
-      />
+      {!user && (
+        <>
+          <SignupModal
+            isOpen={isSignupOpen}
+            onClose={() => setIsSignupOpen(false)}
+            onSwitchToLogin={() => {
+              setIsSignupOpen(false);
+              setIsLoginOpen(true);
+            }}
+          />
+          <LoginModal
+            isOpen={isLoginOpen}
+            onClose={() => setIsLoginOpen(false)}
+            onSwitchToSignup={() => {
+              setIsLoginOpen(false);
+              setIsSignupOpen(true);
+            }}
+          />
+        </>
+      )}
     </>
   );
 }

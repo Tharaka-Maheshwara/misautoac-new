@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { auth } from "@/lib/firebase"; // Import auth from your Firebase config
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -20,6 +22,8 @@ export default function LoginModal({
     remember: false,
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -29,10 +33,23 @@ export default function LoginModal({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login data:", formData);
-    onClose();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      // On successful login, Firebase automatically handles the session.
+      // The auth state change will be handled globally.
+      onClose(); // Close the modal on success
+    } catch (err: any) {
+      // Provide a general error message for security reasons
+      setError("Invalid email or password. Please try again.");
+      console.error("Login Error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -44,7 +61,7 @@ export default function LoginModal({
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-3xl font-bold text-slate-900">Welcome Back</h2>
-            <p className="mt-2 text-slate-600">Access your CoolDrive account</p>
+            <p className="mt-2 text-slate-600">Access your account</p>
           </div>
           <button
             onClick={onClose}
@@ -69,6 +86,12 @@ export default function LoginModal({
 
         {/* Form content */}
         <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <div className="rounded-lg bg-red-100 p-3 text-center text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
           {/* Email Field */}
           <div>
             <label
@@ -99,6 +122,7 @@ export default function LoginModal({
                 placeholder="name@company.com"
                 value={formData.email}
                 onChange={handleInputChange}
+                required
                 className="w-full rounded-lg border border-slate-300 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200"
               />
             </div>
@@ -142,6 +166,7 @@ export default function LoginModal({
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleInputChange}
+                required
                 className="w-full rounded-lg border border-slate-300 bg-slate-50 py-3 pl-10 pr-12 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200"
               />
               <button
@@ -188,9 +213,10 @@ export default function LoginModal({
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full rounded-lg bg-blue-900 py-3 font-bold text-white shadow-lg transition hover:bg-blue-800"
+            disabled={isLoading}
+            className="w-full rounded-lg bg-blue-900 py-3 font-bold text-white shadow-lg transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
 
