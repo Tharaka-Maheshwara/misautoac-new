@@ -9,12 +9,14 @@ import {
   query,
   where,
   getDocs,
+  runTransaction,
+  doc,
 } from "firebase/firestore";
 
 export default function BookAppointmentPage() {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const activeStep = Number(currentStep);
-  const [selectedService, setSelectedService] = useState<number | null>(null);
+  const [selectedServices, setSelectedServices] = useState<number[]>([]);
   const [selectedVehicleType, setSelectedVehicleType] = useState<string | null>(
     null,
   );
@@ -60,7 +62,7 @@ export default function BookAppointmentPage() {
         endOfDay.setHours(23, 59, 59, 999);
 
         const q = query(
-          collection(db, "Appointments"),
+          collection(db, "BookedSlots"),
           where("appointmentDate", ">=", startOfDay),
           where("appointmentDate", "<=", endOfDay),
         );
@@ -72,7 +74,6 @@ export default function BookAppointmentPage() {
         setBookedTimes(times);
       } catch (error) {
         console.error("Error fetching booked times:", error);
-        // Optionally show an error to the user
       } finally {
         setIsLoadingTimes(false);
       }
@@ -122,37 +123,59 @@ export default function BookAppointmentPage() {
   };
   // --- End Calendar Logic ---
 
+  const handleServiceSelection = (serviceId: number) => {
+    setSelectedServices((prev) => {
+      if (prev.includes(serviceId)) {
+        return prev.filter((id) => id !== serviceId);
+      } else {
+        return [...prev, serviceId];
+      }
+    });
+    setErrors((p) => ({ ...p, service: undefined }));
+  };
+
   const handleBookingConfirmation = async () => {
     setIsSubmitting(true);
     setSubmissionError(null);
 
-    const serviceTitle =
-      services.find((s) => s.id === selectedService)?.title || "N/A";
-
-    const appointmentData = {
-      service: serviceTitle,
-      vehicleType: selectedVehicleType,
-      makeModel,
-      year,
-      appointmentDate: selectedDate,
-      appointmentTime: selectedTime,
-      customerName: fullName,
-      customerEmail: emailAddress,
-      customerPhone: phoneNumber,
-      notes: additionalNotes,
-      status: "Scheduled",
-      createdAt: serverTimestamp(),
-    };
-
     try {
-      const docRef = await addDoc(
-        collection(db, "Appointments"),
-        appointmentData,
-      );
-      setBookingRef(docRef.id);
+      await runTransaction(db, async (transaction) => {
+        const serviceTitles = services
+          .filter((s) => selectedServices.includes(s.id))
+          .map((s) => s.title);
+
+        // 1. Create the private appointment document
+        const appointmentData = {
+          services: serviceTitles,
+          vehicleType: selectedVehicleType,
+          makeModel,
+          year,
+          appointmentDate: selectedDate,
+          appointmentTime: selectedTime,
+          customerName: fullName,
+          customerEmail: emailAddress,
+          customerPhone: phoneNumber,
+          notes: additionalNotes,
+          status: "Scheduled",
+          createdAt: serverTimestamp(),
+        };
+        const appointmentRef = doc(collection(db, "Appointments"));
+        transaction.set(appointmentRef, appointmentData);
+
+        // 2. Create the public booked slot document
+        const bookedSlotData = {
+          appointmentDate: selectedDate,
+          appointmentTime: selectedTime,
+        };
+        const bookedSlotRef = doc(collection(db, "BookedSlots"));
+        transaction.set(bookedSlotRef, bookedSlotData);
+
+        setBookingRef(appointmentRef.id);
+      });
+
       setShowConfirmation(true);
     } catch (error) {
-      console.error("Error adding document: ", error);
+      console.error("Error in booking transaction: ", error);
       setSubmissionError(
         "Could not save your appointment. Please try again.",
       );
@@ -444,58 +467,33 @@ export default function BookAppointmentPage() {
                         Select a Service
                       </h2>
                       <p className="text-gray-500">
-                        What would you like us to do?
+                        What would you like us to do? (You can select multiple)
                       </p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {services.map((svc) => (
-                      <div
-                        key={svc.id}
-                        onClick={() => {
-                          setSelectedService(svc.id);
-                          setErrors((p) => ({ ...p, service: undefined }));
-                        }}
-                        className={`cursor-pointer border-2 rounded-xl p-4 flex gap-4 transition-all relative ${
-                          selectedService === svc.id
-                            ? "border-indigo-400 bg-indigo-50/50 shadow-sm"
-                            : "border-gray-200 hover:border-gray-300 bg-white"
-                        }`}
-                      >
+                    {services.map((svc) => {
+                      const isSelected = selectedServices.includes(svc.id);
+                      return (
                         <div
-                          className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center mt-1 ${
-                            selectedService === svc.id
-                              ? "bg-indigo-100 text-indigo-600"
-                              : "bg-gray-100 text-gray-500"
+                          key={svc.id}
+                          onClick={() => handleServiceSelection(svc.id)}
+                          className={`cursor-pointer border-2 rounded-xl p-4 flex gap-4 transition-all relative ${
+                            isSelected
+                              ? "border-indigo-400 bg-indigo-50/50 shadow-sm"
+                              : "border-gray-200 hover:border-gray-300 bg-white"
                           }`}
                         >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                          <div
+                            className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center mt-1 ${
+                              isSelected
+                                ? "bg-indigo-100 text-indigo-600"
+                                : "bg-gray-100 text-gray-500"
+                            }`}
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d={svc.icon}
-                            />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <h3
-                            className={`font-semibold ${selectedService === svc.id ? "text-indigo-900" : "text-gray-900"}`}
-                          >
-                            {svc.title}
-                          </h3>
-                          <p className="text-xs text-gray-500 mt-1 mb-2 leading-relaxed">
-                            {svc.desc}
-                          </p>
-                          <div className="flex items-center text-xs text-gray-400 font-medium">
                             <svg
-                              className="w-3.5 h-3.5 mr-1"
+                              className="w-5 h-5"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -504,29 +502,54 @@ export default function BookAppointmentPage() {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                d={svc.icon}
                               />
                             </svg>
-                            {svc.time}
                           </div>
-                        </div>
-                        {selectedService === svc.id && (
-                          <div className="absolute right-4 top-4 text-indigo-500 bg-white rounded-full">
-                            <svg
-                              className="w-5 h-5"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
+                          <div className="flex-1">
+                            <h3
+                              className={`font-semibold ${isSelected ? "text-indigo-900" : "text-gray-900"}`}
                             >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
+                              {svc.title}
+                            </h3>
+                            <p className="text-xs text-gray-500 mt-1 mb-2 leading-relaxed">
+                              {svc.desc}
+                            </p>
+                            <div className="flex items-center text-xs text-gray-400 font-medium">
+                              <svg
+                                className="w-3.5 h-3.5 mr-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                              {svc.time}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    ))}
+                          {isSelected && (
+                            <div className="absolute right-4 top-4 text-indigo-500 bg-white rounded-full">
+                              <svg
+                                className="w-5 h-5"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {errors.service && (
@@ -549,10 +572,11 @@ export default function BookAppointmentPage() {
                   <div className="mt-8 flex justify-end">
                     <button
                       onClick={() => {
-                        if (!selectedService) {
+                        if (selectedServices.length === 0) {
                           setErrors((p) => ({
                             ...p,
-                            service: "Please select a service to continue.",
+                            service:
+                              "Please select at least one service to continue.",
                           }));
                           return;
                         }
@@ -1285,18 +1309,16 @@ export default function BookAppointmentPage() {
                           </div>
                           <div>
                             <p className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
-                              Service
+                              Services
                             </p>
                             <p className="font-semibold text-gray-900">
-                              {selectedService
-                                ? services.find((s) => s.id === selectedService)
-                                    ?.title
-                                : "—"}
-                            </p>
-                            <p className="text-xs text-gray-600 mt-1">
-                              {selectedService
-                                ? services.find((s) => s.id === selectedService)
-                                    ?.time
+                              {selectedServices.length > 0
+                                ? services
+                                    .filter((s) =>
+                                      selectedServices.includes(s.id),
+                                    )
+                                    .map((s) => s.title)
+                                    .join(", ")
                                 : "—"}
                             </p>
                           </div>
@@ -1617,12 +1639,14 @@ export default function BookAppointmentPage() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-gray-400 mb-0.5 uppercase tracking-wide">
-                        Service
+                        Services
                       </p>
                       <p className="text-sm font-semibold text-gray-900">
-                        {selectedService
-                          ? services.find((s) => s.id === selectedService)
-                              ?.title
+                        {selectedServices.length > 0
+                          ? services
+                              .filter((s) => selectedServices.includes(s.id))
+                              .map((s) => s.title)
+                              .join(", ")
                           : "—"}
                       </p>
                     </div>
@@ -1742,8 +1766,11 @@ export default function BookAppointmentPage() {
                   <div className="border-t border-gray-100 mt-2 pt-4 flex justify-between items-center">
                     <p className="text-sm text-gray-500">Est. Duration</p>
                     <p className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                      {selectedService
-                        ? services.find((s) => s.id === selectedService)?.time
+                      {selectedServices.length > 0
+                        ? services
+                            .filter((s) => selectedServices.includes(s.id))
+                            .map((s) => s.time)
+                            .join(", ")
                         : "—"}
                     </p>
                   </div>
@@ -1885,9 +1912,10 @@ export default function BookAppointmentPage() {
                     />
                   </svg>
                   <span className="text-gray-700 font-medium">
-                    {selectedService
-                      ? services.find((s) => s.id === selectedService)?.title
-                      : "Service"}
+                    {services
+                      .filter((s) => selectedServices.includes(s.id))
+                      .map((s) => s.title)
+                      .join(", ")}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -1990,7 +2018,7 @@ export default function BookAppointmentPage() {
                 onClick={() => {
                   setShowConfirmation(false);
                   setCurrentStep(1);
-                  setSelectedService(null);
+                  setSelectedServices([]);
                   setSelectedVehicleType(null);
                   setMakeModel("");
                   setYear("");
@@ -2024,7 +2052,7 @@ export default function BookAppointmentPage() {
                 onClick={() => {
                   setShowConfirmation(false);
                   setCurrentStep(1);
-                  setSelectedService(null);
+                  setSelectedServices([]);
                   setSelectedVehicleType(null);
                   setMakeModel("");
                   setYear("");
