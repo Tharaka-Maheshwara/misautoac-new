@@ -1,5 +1,9 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 // Firebase Configuration
@@ -18,4 +22,12 @@ const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 // අවශ්‍ය Firebase services export කරගැනීම
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Google Auth Provider
+const googleProvider = new GoogleAuthProvider();
+
+export const signInWithGoogle = () => {
+  return signInWithPopup(auth, googleProvider);
+};
+
 export default app;

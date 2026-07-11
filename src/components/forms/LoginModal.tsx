@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { auth } from "@/lib/firebase"; // Import auth from your Firebase config
+import { auth, signInWithGoogle } from "@/lib/firebase"; // Import auth and signInWithGoogle
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 interface LoginModalProps {
@@ -40,15 +40,28 @@ export default function LoginModal({
 
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      // On successful login, Firebase automatically handles the session.
-      // The auth state change will be handled globally.
       onClose(); // Close the modal on success
     } catch (err: any) {
-      // Provide a general error message for security reasons
       setError("Invalid email or password. Please try again.");
       console.error("Login Error:", err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError("");
+    try {
+      await signInWithGoogle();
+      onClose(); // Close modal on successful Google sign-in
+    } catch (err: any) {
+      // Handle specific Google sign-in errors if necessary
+      if (err.code === "auth/popup-closed-by-user") {
+        setError("Google Sign-In was cancelled.");
+      } else {
+        setError("Failed to sign in with Google. Please try again.");
+      }
+      console.error("Google Sign-In Error:", err);
     }
   };
 
@@ -84,8 +97,31 @@ export default function LoginModal({
           </button>
         </div>
 
+        {/* Google Sign-In Button */}
+        <div className="space-y-5">
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white py-3 font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50"
+          >
+            <img
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwAeXALckYvVkP0lA1PqDqdZLYqpsTl8pOly0h15Bwag&s=10"
+              alt="Google icon"
+              className="h-6 w-6"
+            />
+            <span>Sign in with Google</span>
+          </button>
+
+          {/* Divider */}
+          <div className="flex items-center">
+            <div className="flex-grow border-t border-slate-200"></div>
+            <span className="mx-4 text-sm font-medium text-slate-400">OR</span>
+            <div className="flex-grow border-t border-slate-200"></div>
+          </div>
+        </div>
+
         {/* Form content */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5 mt-5">
           {error && (
             <div className="rounded-lg bg-red-100 p-3 text-center text-sm text-red-700">
               {error}
