@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 
 export default function BookAppointmentPage() {
-  const [currentStep, setCurrentStep] = useState<number>(2);
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const activeStep = Number(currentStep);
   const [selectedService, setSelectedService] = useState<number | null>(null);
   const [selectedVehicleType, setSelectedVehicleType] = useState<string | null>(
