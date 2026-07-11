@@ -15,11 +15,11 @@ export default function BookAppointmentPage() {
   const [emailAddress, setEmailAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
-  const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
-  const selectedMonth = "May";
-  const selectedYear = 2026;
+
+  const [viewDate, setViewDate] = useState(new Date());
 
   const [errors, setErrors] = useState<{
     service?: string;
@@ -30,6 +30,47 @@ export default function BookAppointmentPage() {
     email?: string;
     phone?: string;
   }>({});
+
+  // --- Calendar Logic ---
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize today to the start of the day
+
+  const firstDayOfMonth = new Date(
+    viewDate.getFullYear(),
+    viewDate.getMonth(),
+    1,
+  );
+  const daysInMonth = new Date(
+    viewDate.getFullYear(),
+    viewDate.getMonth() + 1,
+    0,
+  ).getDate();
+
+  const startingDayOfWeek = firstDayOfMonth.getDay(); // 0 for Sunday, 1 for Monday, etc.
+
+  const calendarDays = Array.from({ length: startingDayOfWeek }, () => null).concat(
+    Array.from({ length: daysInMonth }, (_, i) => {
+      const dayDate = new Date(
+        viewDate.getFullYear(),
+        viewDate.getMonth(),
+        i + 1,
+      );
+      return dayDate;
+    }),
+  );
+
+  const handlePrevMonth = () => {
+    setViewDate(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
+    );
+  };
+
+  const handleNextMonth = () => {
+    setViewDate(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
+    );
+  };
+  // --- End Calendar Logic ---
 
   // Generate booking reference
   const generateBookingReference = () => {
@@ -579,7 +620,15 @@ export default function BookAppointmentPage() {
                           </p>
                           <div className="border border-gray-200 rounded-xl p-4 bg-white">
                             <div className="flex justify-between items-center mb-4">
-                              <button className="p-1 hover:bg-gray-100 rounded text-gray-600">
+                              <button
+                                onClick={handlePrevMonth}
+                                className="p-1 hover:bg-gray-100 rounded text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={
+                                  viewDate.getFullYear() ===
+                                    today.getFullYear() &&
+                                  viewDate.getMonth() === today.getMonth()
+                                }
+                              >
                                 <svg
                                   className="w-4 h-4"
                                   fill="none"
@@ -595,9 +644,15 @@ export default function BookAppointmentPage() {
                                 </svg>
                               </button>
                               <span className="font-semibold text-sm text-gray-800">
-                                May 2026
+                                {viewDate.toLocaleString("default", {
+                                  month: "long",
+                                  year: "numeric",
+                                })}
                               </span>
-                              <button className="p-1 hover:bg-gray-100 rounded text-gray-600">
+                              <button
+                                onClick={handleNextMonth}
+                                className="p-1 hover:bg-gray-100 rounded text-gray-600"
+                              >
                                 <svg
                                   className="w-4 h-4"
                                   fill="none"
@@ -626,25 +681,47 @@ export default function BookAppointmentPage() {
                               )}
                             </div>
                             <div className="grid grid-cols-7 gap-1 text-center">
-                              {Array.from({ length: 31 }, (_, i) => i + 1).map(
-                                (day) => (
+                              {calendarDays.map((day, index) => {
+                                if (!day) {
+                                  return <div key={`empty-${index}`}></div>;
+                                }
+                                const isPast = day < today;
+                                const isSelected =
+                                  selectedDate?.getTime() === day.getTime();
+
+                                return (
                                   <div
-                                    key={day}
-                                    onClick={() => setSelectedDate(day)}
-                                    className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm cursor-pointer ${
-                                      selectedDate === day
+                                    key={day.toISOString()}
+                                    onClick={() => {
+                                      if (!isPast) {
+                                        setSelectedDate(day);
+                                        setErrors((p) => ({
+                                          ...p,
+                                          date: undefined,
+                                        }));
+                                      }
+                                    }}
+                                    className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm ${
+                                      isPast
+                                        ? "text-gray-300 pointer-events-none"
+                                        : "cursor-pointer hover:bg-blue-50 text-gray-700"
+                                    } ${
+                                      isSelected
                                         ? "bg-blue-600 text-white font-bold shadow-md"
-                                        : day < 17
-                                          ? "text-gray-300 pointer-events-none"
-                                          : "hover:bg-blue-50 text-gray-700"
+                                        : ""
                                     }`}
                                   >
-                                    {day}
+                                    {day.getDate()}
                                   </div>
-                                ),
-                              )}
+                                );
+                              })}
                             </div>
                           </div>
+                          {errors.date && (
+                            <div className="mt-2 text-sm text-red-600">
+                              {errors.date}
+                            </div>
+                          )}
                         </div>
 
                         <div className="w-full md:w-1/2">
@@ -1194,8 +1271,9 @@ export default function BookAppointmentPage() {
                               Date
                             </p>
                             <p className="font-semibold text-gray-900">
-                              {selectedMonth} {selectedDate ?? "—"},{" "}
-                              {selectedYear}
+                              {selectedDate
+                                ? `${selectedDate.toLocaleString("default", { month: "long" })} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`
+                                : "—"}
                             </p>
                           </div>
                         </div>
@@ -1497,7 +1575,7 @@ export default function BookAppointmentPage() {
                             (vehicle) => vehicle.id === selectedVehicleType,
                           )?.icon
                         }{" "}
-                        {selectedVehicleType}
+                        {selectedVehicleType ?? "—"}
                       </p>
                     </div>
                   </div>
@@ -1523,7 +1601,9 @@ export default function BookAppointmentPage() {
                         Date
                       </p>
                       <p className="text-sm font-semibold text-gray-900">
-                        {selectedMonth} {selectedDate ?? "—"}, {selectedYear}
+                        {selectedDate
+                          ? `${selectedDate.toLocaleString("default", { month: "long" })} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`
+                          : "—"}
                       </p>
                     </div>
                   </div>
@@ -1768,7 +1848,9 @@ export default function BookAppointmentPage() {
                     />
                   </svg>
                   <span className="text-gray-700 font-medium">
-                    {selectedMonth} {selectedDate}, {selectedYear}
+                    {selectedDate
+                      ? `${selectedDate.toLocaleString("default", { month: "long" })} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`
+                      : "—"}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
