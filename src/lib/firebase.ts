@@ -9,6 +9,12 @@ import {
   doc,
   setDoc,
   serverTimestamp,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  limit,
+  getDocs,
 } from "firebase/firestore";
 
 // Firebase Configuration
@@ -61,6 +67,38 @@ export const createUserDocument = async (user, additionalData = {}) => {
   } catch (error) {
     console.error("Error creating user document in Firestore:", error);
   }
+};
+
+/**
+ * Adds a feedback document to the "Feedbacks" collection in Firestore.
+ * @param {object} feedbackData - The feedback data to be saved.
+ */
+export const addFeedbackDocument = async (feedbackData) => {
+  try {
+    await addDoc(collection(db, "Feedbacks"), {
+      ...feedbackData,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error adding feedback document:", error);
+    throw error; // Re-throw the error to be handled by the component
+  }
+};
+
+/**
+ * Fetches the latest feedbacks from Firestore.
+ * @param {number} count - The number of feedbacks to fetch.
+ * @returns {Promise<Array>} A promise that resolves to an array of feedback documents.
+ */
+export const getFeedbacks = async (count = 6) => {
+  const feedbacksCol = collection(db, "Feedbacks");
+  const q = query(feedbacksCol, orderBy("createdAt", "desc"), limit(count));
+  const feedbackSnapshot = await getDocs(q);
+  const feedbackList = feedbackSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  return feedbackList;
 };
 
 export default app;

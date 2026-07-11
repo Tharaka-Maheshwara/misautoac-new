@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { addFeedbackDocument } from "@/lib/firebase";
 
 export default function CustomerFeedbackForm() {
   const { user } = useAuth();
@@ -9,6 +10,7 @@ export default function CustomerFeedbackForm() {
   const [hoveredRating, setHoveredRating] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -35,23 +37,44 @@ export default function CustomerFeedbackForm() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+
+    if (!user) {
+      setError("You must be logged in to submit feedback.");
+      return;
+    }
+    if (rating === 0) {
+      setError("Please provide a rating.");
+      return;
+    }
+
     setIsSubmitting(true);
-    // Simulate API call with formData
-    console.log("Submitting feedback:", { ...formData, rating });
-    setTimeout(() => {
-      setIsSubmitting(false);
+
+    try {
+      const feedbackData = {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+        rating,
+        userId: user.uid,
+      };
+      await addFeedbackDocument(feedbackData);
+
       setIsSubmitted(true);
-      // Reset form after 3 seconds
       setTimeout(() => {
         setIsSubmitted(false);
         setRating(0);
         setHoveredRating(0);
-        // Reset only the message, keep user details pre-filled
         setFormData((prev) => ({ ...prev, message: "" }));
       }, 3000);
-    }, 1500);
+    } catch (err) {
+      setError("Failed to submit feedback. Please try again later.");
+      console.error("Feedback submission error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -98,6 +121,11 @@ export default function CustomerFeedbackForm() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="rounded-lg bg-red-100 p-3 text-center text-sm text-red-700">
+                  {error}
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label
