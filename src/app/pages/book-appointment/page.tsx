@@ -1,6 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 
 export default function BookAppointmentPage() {
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -18,6 +27,11 @@ export default function BookAppointmentPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [bookingRef, setBookingRef] = useState("");
+  const [bookedTimes, setBookedTimes] = useState<string[]>([]);
+  const [isLoadingTimes, setIsLoadingTimes] = useState<boolean>(false);
 
   const [viewDate, setViewDate] = useState(new Date());
 
@@ -31,9 +45,45 @@ export default function BookAppointmentPage() {
     phone?: string;
   }>({});
 
+  // --- Fetch Booked Times ---
+  useEffect(() => {
+    const fetchBookedTimes = async () => {
+      if (!selectedDate) return;
+
+      setIsLoadingTimes(true);
+      setBookedTimes([]);
+      try {
+        const startOfDay = new Date(selectedDate);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(selectedDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const q = query(
+          collection(db, "Appointments"),
+          where("appointmentDate", ">=", startOfDay),
+          where("appointmentDate", "<=", endOfDay),
+        );
+
+        const querySnapshot = await getDocs(q);
+        const times = querySnapshot.docs.map(
+          (doc) => doc.data().appointmentTime,
+        );
+        setBookedTimes(times);
+      } catch (error) {
+        console.error("Error fetching booked times:", error);
+        // Optionally show an error to the user
+      } finally {
+        setIsLoadingTimes(false);
+      }
+    };
+
+    fetchBookedTimes();
+  }, [selectedDate]);
+
   // --- Calendar Logic ---
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Normalize today to the start of the day
+  today.setHours(0, 0, 0, 0);
 
   const firstDayOfMonth = new Date(
     viewDate.getFullYear(),
@@ -46,7 +96,7 @@ export default function BookAppointmentPage() {
     0,
   ).getDate();
 
-  const startingDayOfWeek = firstDayOfMonth.getDay(); // 0 for Sunday, 1 for Monday, etc.
+  const startingDayOfWeek = firstDayOfMonth.getDay();
 
   const calendarDays = Array.from({ length: startingDayOfWeek }, () => null).concat(
     Array.from({ length: daysInMonth }, (_, i) => {
@@ -72,14 +122,43 @@ export default function BookAppointmentPage() {
   };
   // --- End Calendar Logic ---
 
-  // Generate booking reference
-  const generateBookingReference = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let result = "ACA-";
-    for (let i = 0; i < 6; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+  const handleBookingConfirmation = async () => {
+    setIsSubmitting(true);
+    setSubmissionError(null);
+
+    const serviceTitle =
+      services.find((s) => s.id === selectedService)?.title || "N/A";
+
+    const appointmentData = {
+      service: serviceTitle,
+      vehicleType: selectedVehicleType,
+      makeModel,
+      year,
+      appointmentDate: selectedDate,
+      appointmentTime: selectedTime,
+      customerName: fullName,
+      customerEmail: emailAddress,
+      customerPhone: phoneNumber,
+      notes: additionalNotes,
+      status: "Scheduled",
+      createdAt: serverTimestamp(),
+    };
+
+    try {
+      const docRef = await addDoc(
+        collection(db, "Appointments"),
+        appointmentData,
+      );
+      setBookingRef(docRef.id);
+      setShowConfirmation(true);
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      setSubmissionError(
+        "Could not save your appointment. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-    return result;
   };
 
   const vehicleTypes = [
@@ -695,6 +774,7 @@ export default function BookAppointmentPage() {
                                     onClick={() => {
                                       if (!isPast) {
                                         setSelectedDate(day);
+                                        setSelectedTime(null); // Reset time when date changes
                                         setErrors((p) => ({
                                           ...p,
                                           date: undefined,
@@ -729,52 +809,79 @@ export default function BookAppointmentPage() {
                             Available Times *
                           </p>
                           <div className="grid grid-cols-2 gap-2">
-                            {[
-                              "8:00 AM",
-                              "9:00 AM",
-                              "10:00 AM",
-                              "11:00 AM",
-                              "12:00 PM",
-                              "1:00 PM",
-                              "2:00 PM",
-                              "3:00 PM",
-                              "4:00 PM",
-                              "5:00 PM",
-                            ].map((time) => (
-                              <div
-                                key={time}
-                                onClick={() => {
-                                  setSelectedTime(time);
-                                  setErrors((p) => ({ ...p, time: undefined }));
-                                }}
-                                className={`border rounded-lg p-2.5 text-center text-sm font-medium cursor-pointer transition-all flex items-center justify-center gap-1.5 ${
-                                  selectedTime === time
-                                    ? "bg-blue-600 border-blue-600 text-white shadow-md"
-                                    : "border-gray-200 bg-white hover:border-blue-300 text-gray-700"
-                                }`}
-                              >
-                                <svg
-                                  className="w-3.5 h-3.5"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                  />
-                                </svg>
-                                {time}
+                            {isLoadingTimes && (
+                              <div className="col-span-2 text-center text-gray-500">
+                                Loading times...
                               </div>
-                            ))}
+                            )}
+                            {!isLoadingTimes &&
+                              [
+                                "8:00 AM",
+                                "9:00 AM",
+                                "10:00 AM",
+                                "11:00 AM",
+                                "12:00 PM",
+                                "1:00 PM",
+                                "2:00 PM",
+                                "3:00 PM",
+                                "4:00 PM",
+                                "5:00 PM",
+                              ].map((time) => {
+                                const isBooked = bookedTimes.includes(time);
+                                return (
+                                  <button
+                                    key={time}
+                                    disabled={isBooked}
+                                    onClick={() => {
+                                      if (!isBooked) {
+                                        setSelectedTime(time);
+                                        setErrors((p) => ({
+                                          ...p,
+                                          time: undefined,
+                                        }));
+                                      }
+                                    }}
+                                    className={`border rounded-lg p-2.5 text-center text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
+                                      selectedTime === time
+                                        ? "bg-blue-600 border-blue-600 text-white shadow-md"
+                                        : isBooked
+                                          ? "bg-gray-200 border-gray-200 text-gray-400 cursor-not-allowed"
+                                          : "border-gray-200 bg-white hover:border-blue-300 text-gray-700"
+                                    }`}
+                                  >
+                                    <svg
+                                      className="w-3.5 h-3.5"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                    {time}
+                                  </button>
+                                );
+                              })}
                             {errors.time && (
                               <div className="mt-2 text-sm text-red-600">
                                 {errors.time}
                               </div>
                             )}
                           </div>
+                          {!isLoadingTimes && bookedTimes.length > 0 && (
+                            <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 p-3">
+                              <p className="font-bold text-sm">
+                                Already Booked:
+                              </p>
+                              <p className="text-xs">
+                                {bookedTimes.join(", ")}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1399,75 +1506,18 @@ export default function BookAppointmentPage() {
                       )}
                     </div>
 
-                    {/* Benefits Section */}
-                    <div className="grid grid-cols-3 gap-3 mb-8">
-                      <div className="bg-blue-50 rounded-lg border border-blue-100 p-3 text-center">
-                        <div className="text-blue-600 mb-2 flex justify-center">
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                        </div>
-                        <p className="text-xs font-semibold text-blue-900">
-                          Free Diagnostics
-                        </p>
+                    {submissionError && (
+                      <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 mb-6">
+                        {submissionError}
                       </div>
-                      <div className="bg-blue-50 rounded-lg border border-blue-100 p-3 text-center">
-                        <div className="text-blue-600 mb-2 flex justify-center">
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                        </div>
-                        <p className="text-xs font-semibold text-blue-900">
-                          12 Month Warranty
-                        </p>
-                      </div>
-                      <div className="bg-blue-50 rounded-lg border border-blue-100 p-3 text-center">
-                        <div className="text-blue-600 mb-2 flex justify-center">
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                        </div>
-                        <p className="text-xs font-semibold text-blue-900">
-                          Flexible Rescheduling
-                        </p>
-                      </div>
-                    </div>
+                    )}
 
                     {/* Action Buttons */}
                     <div className="flex justify-between items-center">
                       <button
                         onClick={() => setCurrentStep(3)}
-                        className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-6 rounded-full transition-all flex items-center gap-2"
+                        disabled={isSubmitting}
+                        className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-6 rounded-full transition-all flex items-center gap-2 disabled:opacity-50"
                       >
                         <svg
                           className="w-4 h-4"
@@ -1485,23 +1535,52 @@ export default function BookAppointmentPage() {
                         Back
                       </button>
                       <button
-                        onClick={() => setShowConfirmation(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-full shadow-md flex items-center gap-2 transition-all"
+                        onClick={handleBookingConfirmation}
+                        disabled={isSubmitting}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-full shadow-md flex items-center gap-2 transition-all disabled:bg-blue-400 disabled:cursor-not-allowed"
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        Confirm Appointment
+                        {isSubmitting ? (
+                          <>
+                            <svg
+                              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            Confirm Appointment
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -1787,7 +1866,7 @@ export default function BookAppointmentPage() {
                   Booking Reference
                 </span>
                 <span className="text-sm font-bold text-blue-600">
-                  {generateBookingReference()}
+                  {bookingRef}
                 </span>
               </div>
               <div className="space-y-3 text-sm">
@@ -1912,7 +1991,7 @@ export default function BookAppointmentPage() {
                   setShowConfirmation(false);
                   setCurrentStep(1);
                   setSelectedService(null);
-                  setSelectedVehicleType("Electric");
+                  setSelectedVehicleType(null);
                   setMakeModel("");
                   setYear("");
                   setFullName("");
@@ -1921,6 +2000,7 @@ export default function BookAppointmentPage() {
                   setAdditionalNotes("");
                   setSelectedDate(null);
                   setSelectedTime(null);
+                  setBookingRef("");
                 }}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full shadow-md transition-all flex items-center justify-center gap-2"
               >
@@ -1945,7 +2025,7 @@ export default function BookAppointmentPage() {
                   setShowConfirmation(false);
                   setCurrentStep(1);
                   setSelectedService(null);
-                  setSelectedVehicleType("Electric");
+                  setSelectedVehicleType(null);
                   setMakeModel("");
                   setYear("");
                   setFullName("");
@@ -1954,6 +2034,7 @@ export default function BookAppointmentPage() {
                   setAdditionalNotes("");
                   setSelectedDate(null);
                   setSelectedTime(null);
+                  setBookingRef("");
                 }}
                 className="flex-1 bg-white border-2 border-blue-200 hover:border-blue-300 text-blue-600 font-medium py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2"
                 aria-label="Close and reset form"
