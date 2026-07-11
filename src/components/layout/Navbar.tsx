@@ -9,6 +9,7 @@ import LoginModal from "../forms/LoginModal";
 import { useAuth } from "@/context/AuthContext"; // Import useAuth
 import { auth } from "@/lib/firebase"; // Import auth
 import { signOut } from "firebase/auth"; // Import signOut
+import LogoutConfirmationModal from "../forms/LogoutConfirmationModal";
 
 // Dropdown Items Data
 const serviceDropdownItems = [
@@ -34,6 +35,7 @@ export default function Navbar() {
   const { user } = useAuth(); // Get user from AuthContext
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -57,6 +59,12 @@ export default function Navbar() {
     }
   };
 
+  const handleConfirmLogout = () => {
+    handleLogout();
+    setIsLogoutModalOpen(false);
+    setIsMobileMenuOpen(false); // Ensure mobile menu closes if open
+  };
+
   // Track scroll position for sticky effect
   useEffect(() => {
     const handleScroll = () => {
@@ -75,9 +83,9 @@ export default function Navbar() {
     setIsSparePartsDesktopOpen(false);
   }, [pathname]);
 
-  // Lock body scroll when mobile menu is open
+  // Lock body scroll when mobile menu or modals are open
   useEffect(() => {
-    if (isMobileMenuOpen) {
+    if (isMobileMenuOpen || isLogoutModalOpen || isLoginOpen || isSignupOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -85,7 +93,7 @@ export default function Navbar() {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isMobileMenuOpen]);
+  }, [isMobileMenuOpen, isLogoutModalOpen, isLoginOpen, isSignupOpen]);
 
   const toggleMobileMenu = useCallback(() => {
     setIsMobileMenuOpen((prev) => !prev);
@@ -351,8 +359,8 @@ export default function Navbar() {
                   Welcome, {displayName}
                 </span>
                 <button
-                  onClick={handleLogout}
-                  className="rounded-lg px-4 py-2 text-base font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
+                  onClick={() => setIsLogoutModalOpen(true)}
+                  className="rounded-lg border border-red-500 bg-red-50 px-4 py-2 text-base font-medium text-red-600 transition-all duration-200 hover:bg-red-100 hover:text-red-700 active:scale-95"
                 >
                   Logout
                 </button>
@@ -593,11 +601,8 @@ export default function Navbar() {
         <div className="flex flex-col gap-2 px-4 py-4">
           {user ? (
             <button
-              onClick={() => {
-                handleLogout();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-100 hover:border-slate-300"
+              onClick={() => setIsLogoutModalOpen(true)}
+              className="w-full rounded-lg bg-red-50 px-4 py-2.5 text-base font-medium text-red-700 transition-all duration-200 hover:bg-red-100 border border-red-500/50"
             >
               Logout ({displayName})
             </button>
@@ -630,6 +635,12 @@ export default function Navbar() {
       <div className="h-24 sm:h-28" />
 
       {/* ===== MODALS ===== */}
+      <LogoutConfirmationModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleConfirmLogout}
+      />
+
       {!user && (
         <>
           <SignupModal
