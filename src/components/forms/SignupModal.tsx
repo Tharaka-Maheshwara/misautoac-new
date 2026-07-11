@@ -2,8 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { auth, signInWithGoogle } from "@/lib/firebase"; // Import auth and signInWithGoogle
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth, signInWithGoogle, createUserDocument } from "@/lib/firebase"; // Import createUserDocument
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  getAdditionalUserInfo,
+} from "firebase/auth";
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -60,11 +64,17 @@ export default function SignupModal({
         formData.email,
         formData.password
       );
+      const user = userCredential.user;
+
       // After creating the user, update their profile with the full name
-      if (userCredential.user) {
-        await updateProfile(userCredential.user, {
+      if (user) {
+        await updateProfile(user, {
           displayName: formData.fullName,
         });
+
+        // Now create the user document in Firestore
+        // We pass the user object and the additional data (displayName)
+        await createUserDocument(user, { displayName: formData.fullName });
       }
       onClose();
     } catch (err: any) {
@@ -73,7 +83,9 @@ export default function SignupModal({
           setError("This email address is already in use.");
           break;
         case "auth/weak-password":
-          setError("The password is too weak. It must be at least 6 characters long.");
+          setError(
+            "The password is too weak. It must be at least 6 characters long."
+          );
           break;
         case "auth/invalid-email":
           setError("The email address is not valid.");
@@ -91,7 +103,13 @@ export default function SignupModal({
   const handleGoogleSignIn = async () => {
     setError("");
     try {
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      // Check if the user is new
+      const additionalInfo = getAdditionalUserInfo(result);
+      if (additionalInfo?.isNewUser) {
+        // If new, create a document for them in Firestore
+        await createUserDocument(result.user);
+      }
       onClose();
     } catch (err: any) {
       if (err.code !== "auth/popup-closed-by-user") {
@@ -146,7 +164,9 @@ export default function SignupModal({
 
             <div className="flex items-center">
               <div className="flex-grow border-t border-slate-200"></div>
-              <span className="mx-4 text-sm font-medium text-slate-400">OR</span>
+              <span className="mx-4 text-sm font-medium text-slate-400">
+                OR
+              </span>
               <div className="flex-grow border-t border-slate-200"></div>
             </div>
           </div>

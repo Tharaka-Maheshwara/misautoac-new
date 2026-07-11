@@ -1,4 +1,37 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+
 export default function ContactPage() {
+  const { user } = useAuth();
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prevData) => ({
+        ...prevData,
+        fullName: user.displayName || "",
+        email: user.email || "",
+      }));
+    }
+  }, [user]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
+  };
+
   return (
     <main className="flex flex-col min-h-screen">
       {/* Contact Header Section */}
@@ -45,6 +78,8 @@ export default function ContactPage() {
                     type="text"
                     id="fullName"
                     placeholder="John Doe"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
                     className="w-full bg-gray-50 border border-transparent focus:border-gray-200 focus:bg-white focus:ring-0 rounded-lg py-3 px-4 text-gray-700 outline-none transition-colors"
                   />
                 </div>
@@ -61,6 +96,8 @@ export default function ContactPage() {
                     type="email"
                     id="email"
                     placeholder="john@example.com"
+                    value={formData.email}
+                    onChange={handleInputChange}
                     className="w-full bg-gray-50 border border-transparent focus:border-gray-200 focus:bg-white focus:ring-0 rounded-lg py-3 px-4 text-gray-700 outline-none transition-colors"
                   />
                 </div>
@@ -78,6 +115,8 @@ export default function ContactPage() {
                   type="tel"
                   id="phone"
                   placeholder="(555) 000-0000"
+                  value={formData.phone}
+                  onChange={handleInputChange}
                   className="w-full bg-gray-50 border border-transparent focus:border-gray-200 focus:bg-white focus:ring-0 rounded-lg py-3 px-4 text-gray-700 outline-none transition-colors"
                 />
               </div>
@@ -94,6 +133,8 @@ export default function ContactPage() {
                   id="message"
                   rows={5}
                   placeholder="How can we help you today?"
+                  value={formData.message}
+                  onChange={handleInputChange}
                   className="w-full bg-gray-50 border border-transparent focus:border-gray-200 focus:bg-white focus:ring-0 rounded-lg py-3 px-4 text-gray-700 outline-none transition-colors resize-y"
                 ></textarea>
               </div>

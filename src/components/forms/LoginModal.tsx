@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { auth, signInWithGoogle } from "@/lib/firebase"; // Import auth and signInWithGoogle
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, signInWithGoogle, createUserDocument } from "@/lib/firebase"; // Import createUserDocument
+import {
+  signInWithEmailAndPassword,
+  getAdditionalUserInfo,
+} from "firebase/auth";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -52,7 +55,13 @@ export default function LoginModal({
   const handleGoogleSignIn = async () => {
     setError("");
     try {
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      // Check if the user is new
+      const additionalInfo = getAdditionalUserInfo(result);
+      if (additionalInfo?.isNewUser) {
+        // If new, create a document for them in Firestore
+        await createUserDocument(result.user);
+      }
       onClose(); // Close modal on successful Google sign-in
     } catch (err: any) {
       // Handle specific Google sign-in errors if necessary
