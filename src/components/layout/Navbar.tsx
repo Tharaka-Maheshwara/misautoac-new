@@ -143,19 +143,19 @@ export default function Navbar() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? "bg-white/95 backdrop-blur-md shadow-lg border-b border-slate-200/60"
-            : "bg-white border-b border-slate-200"
+            ? "bg-white/95 backdrop-blur-md shadow-lg"
+            : "bg-white"
         }`}
       >
         <div
-          className={`mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
-            isScrolled ? "py-2" : "py-4"
+          className={`relative mx-auto flex w-full items-center px-4 sm:px-6 lg:px-8 transition-all duration-300 ${
+            isScrolled ? "min-h-[72px]" : "min-h-[96px] sm:min-h-[112px]"
           }`}
         >
-          {/* ===== LEFT: Logo & Name ===== */}
+          {/* ===== LEFT: Logo & Name — pinned to the true left edge, vertically centered ===== */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 shrink-0"
+            className="absolute left-4 sm:left-6 lg:left-8 top-1/2 -translate-y-1/2 flex items-center gap-2.5 shrink-0"
             aria-label="Mist Auto A/C - Home"
           >
             <div
@@ -194,7 +194,7 @@ export default function Navbar() {
           {/* ===== CENTER: Navigation Links (Desktop) ===== */}
           <nav
             aria-label="Primary navigation"
-            className="hidden lg:flex items-center"
+            className="hidden lg:flex items-center mx-auto"
           >
             <ul className="flex items-center gap-1">
               {/* 1. Home Link */}
@@ -351,8 +351,8 @@ export default function Navbar() {
             </ul>
           </nav>
 
-          {/* ===== RIGHT: Auth Buttons (Desktop) ===== */}
-          <div className="hidden lg:flex items-center gap-2 shrink-0">
+          {/* ===== RIGHT: Auth Buttons (Desktop) — pinned to the true right edge ===== */}
+          <div className="hidden lg:flex items-center gap-2 absolute right-4 sm:right-6 lg:right-8 top-1/2 -translate-y-1/2">
             {user ? (
               <>
                 <span className="text-sm text-slate-600 mr-2 hidden sm:block">
@@ -386,7 +386,7 @@ export default function Navbar() {
           {/* ===== HAMBURGER BUTTON (Mobile / Tablet) ===== */}
           <button
             onClick={toggleMobileMenu}
-            className="lg:hidden relative flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100"
+            className="lg:hidden relative flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100 ml-auto"
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
           >
@@ -632,7 +632,7 @@ export default function Navbar() {
       </nav>
 
       {/* ===== SPACER ===== */}
-      <div className="h-24 sm:h-28" />
+      <div className="h-24 sm:h-28 bg-white" />
 
       {/* ===== MODALS ===== */}
       <LogoutConfirmationModal
