@@ -4,8 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
-import SignupModal from "../forms/SignupModal";
-import LoginModal from "../forms/LoginModal";
 import { useAuth } from "@/context/AuthContext"; // Import useAuth
 import { auth } from "@/lib/firebase"; // Import auth
 import { signOut } from "firebase/auth"; // Import signOut
@@ -33,8 +31,6 @@ const sparePartsDropdownItems = [
 export default function Navbar() {
   const pathname = usePathname();
   const { user } = useAuth(); // Get user from AuthContext
-  const [isSignupOpen, setIsSignupOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -91,7 +87,7 @@ export default function Navbar() {
 
   // Lock body scroll when mobile menu or modals are open
   useEffect(() => {
-    if (isMobileMenuOpen || isLogoutModalOpen || isLoginOpen || isSignupOpen) {
+    if (isMobileMenuOpen || isLogoutModalOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -99,7 +95,7 @@ export default function Navbar() {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isMobileMenuOpen, isLogoutModalOpen, isLoginOpen, isSignupOpen]);
+  }, [isMobileMenuOpen, isLogoutModalOpen]);
 
   // Close user menu when clicking outside of it
   useEffect(() => {
@@ -460,18 +456,18 @@ export default function Navbar() {
               </div>
             ) : (
               <>
-                <button
-                  onClick={() => setIsLoginOpen(true)}
+                <Link
+                  href="/pages/login"
                   className="rounded-lg px-4 py-2 text-base font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
                 >
                   Login
-                </button>
-                <button
-                  onClick={() => setIsSignupOpen(true)}
+                </Link>
+                <Link
+                  href="/pages/sign-up"
                   className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2 text-base font-semibold text-white shadow-sm shadow-blue-200 transition-all duration-200 hover:bg-blue-700 hover:shadow-md hover:shadow-blue-300 active:scale-95"
                 >
                   Sign Up
-                </button>
+                </Link>
               </>
             )}
           </div>
@@ -724,24 +720,20 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsLoginOpen(true);
-                }}
-                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300"
+              <Link
+                href="/pages/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 text-center"
               >
                 Login
-              </button>
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsSignupOpen(true);
-                }}
-                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 active:scale-95"
+              </Link>
+              <Link
+                href="/pages/sign-up"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 active:scale-95 text-center"
               >
                 Sign Up
-              </button>
+              </Link>
             </>
           )}
         </div>
@@ -756,27 +748,6 @@ export default function Navbar() {
         onClose={() => setIsLogoutModalOpen(false)}
         onConfirm={handleConfirmLogout}
       />
-
-      {!user && (
-        <>
-          <SignupModal
-            isOpen={isSignupOpen}
-            onClose={() => setIsSignupOpen(false)}
-            onSwitchToLogin={() => {
-              setIsSignupOpen(false);
-              setIsLoginOpen(true);
-            }}
-          />
-          <LoginModal
-            isOpen={isLoginOpen}
-            onClose={() => setIsLoginOpen(false)}
-            onSwitchToSignup={() => {
-              setIsLoginOpen(false);
-              setIsSignupOpen(true);
-            }}
-          />
-        </>
-      )}
     </>
   );
 }
