@@ -47,8 +47,12 @@ export default function Navbar() {
   const [isSparePartsDesktopOpen, setIsSparePartsDesktopOpen] = useState(false);
   const [isSparePartsMobileOpen, setIsSparePartsMobileOpen] = useState(false);
 
+  // Dropdown state for User Menu (Welcome, Name)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
   const closeServicesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const closeSparePartsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -63,6 +67,7 @@ export default function Navbar() {
     handleLogout();
     setIsLogoutModalOpen(false);
     setIsMobileMenuOpen(false); // Ensure mobile menu closes if open
+    setIsUserMenuOpen(false);
   };
 
   // Track scroll position for sticky effect
@@ -81,6 +86,7 @@ export default function Navbar() {
     setIsServicesDesktopOpen(false);
     setIsSparePartsMobileOpen(false);
     setIsSparePartsDesktopOpen(false);
+    setIsUserMenuOpen(false);
   }, [pathname]);
 
   // Lock body scroll when mobile menu or modals are open
@@ -94,6 +100,22 @@ export default function Navbar() {
       document.body.style.overflow = "";
     };
   }, [isMobileMenuOpen, isLogoutModalOpen, isLoginOpen, isSignupOpen]);
+
+  // Close user menu when clicking outside of it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    if (isUserMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isUserMenuOpen]);
 
   const toggleMobileMenu = useCallback(() => {
     setIsMobileMenuOpen((prev) => !prev);
@@ -123,6 +145,22 @@ export default function Navbar() {
     closeSparePartsTimeoutRef.current = setTimeout(() => {
       setIsSparePartsDesktopOpen(false);
     }, 150);
+  };
+
+  const toggleUserMenu = () => {
+    setIsUserMenuOpen((prev) => !prev);
+  };
+
+  const handleMyProfile = () => {
+    setIsUserMenuOpen(false);
+    // Navigate to profile page — update the path if different in your app
+    window.location.href = "/pages/profile";
+  };
+
+  const handleRateUs = () => {
+    setIsUserMenuOpen(false);
+    // Navigate to rate-us page or open a review link — update as needed
+    window.location.href = "/pages/rate-us";
   };
 
   const getDisplayName = () => {
@@ -354,17 +392,72 @@ export default function Navbar() {
           {/* ===== RIGHT: Auth Buttons (Desktop) — pinned to the true right edge ===== */}
           <div className="hidden lg:flex items-center gap-2 absolute right-4 sm:right-6 lg:right-8 top-1/2 -translate-y-1/2">
             {user ? (
-              <>
-                <span className="text-sm text-slate-600 mr-2 hidden sm:block">
-                  Welcome, {displayName}
-                </span>
+              <div className="relative" ref={userMenuRef}>
                 <button
-                  onClick={() => setIsLogoutModalOpen(true)}
-                  className="rounded-lg border border-red-500 bg-red-50 px-4 py-2 text-base font-medium text-red-600 transition-all duration-200 hover:bg-red-100 hover:text-red-700 active:scale-95"
+                  onClick={toggleUserMenu}
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-slate-600 transition-all duration-200 hover:bg-slate-50"
+                  aria-haspopup="true"
+                  aria-expanded={isUserMenuOpen}
                 >
-                  Logout
+                  <span className="hidden sm:block">
+                    Welcome, {displayName}
+                  </span>
+                  <svg
+                    className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${
+                      isUserMenuOpen ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
                 </button>
-              </>
+
+                {/* User Dropdown Menu */}
+                <div
+                  className={`absolute right-0 mt-2 w-52 rounded-xl bg-white p-2 shadow-xl border border-slate-100 transition-all duration-200 origin-top-right ${
+                    isUserMenuOpen
+                      ? "opacity-100 scale-100 pointer-events-auto"
+                      : "opacity-0 scale-95 pointer-events-none"
+                  }`}
+                >
+                  <ul className="flex flex-col gap-1">
+                    <li>
+                      <button
+                        onClick={handleMyProfile}
+                        className="w-full text-left block rounded-lg px-4 py-2.5 text-[15px] font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50 hover:text-blue-600"
+                      >
+                        My Profile
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        onClick={handleRateUs}
+                        className="w-full text-left block rounded-lg px-4 py-2.5 text-[15px] font-medium text-slate-700 transition-colors duration-150 hover:bg-slate-50 hover:text-blue-600"
+                      >
+                        Rate Us
+                      </button>
+                    </li>
+                    <li className="border-t border-slate-100 mt-1 pt-1">
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          setIsLogoutModalOpen(true);
+                        }}
+                        className="w-full text-left block rounded-lg px-4 py-2.5 text-[15px] font-medium text-red-600 transition-colors duration-150 hover:bg-red-50"
+                      >
+                        Logout
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             ) : (
               <>
                 <button
@@ -600,12 +693,35 @@ export default function Navbar() {
         {/* Drawer Auth Buttons */}
         <div className="flex flex-col gap-2 px-4 py-4">
           {user ? (
-            <button
-              onClick={() => setIsLogoutModalOpen(true)}
-              className="w-full rounded-lg bg-red-50 px-4 py-2.5 text-base font-medium text-red-700 transition-all duration-200 hover:bg-red-100 border border-red-500/50"
-            >
-              Logout ({displayName})
-            </button>
+            <>
+              <div className="px-2 pb-1 text-sm font-medium text-slate-500">
+                Welcome, {displayName}
+              </div>
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  window.location.href = "/pages/profile";
+                }}
+                className="w-full text-left rounded-lg px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 border border-slate-200"
+              >
+                My Profile
+              </button>
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  window.location.href = "/pages/rate-us";
+                }}
+                className="w-full text-left rounded-lg px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 border border-slate-200"
+              >
+                Rate Us
+              </button>
+              <button
+                onClick={() => setIsLogoutModalOpen(true)}
+                className="w-full rounded-lg bg-red-50 px-4 py-2.5 text-base font-medium text-red-700 transition-all duration-200 hover:bg-red-100 border border-red-500/50"
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <>
               <button
