@@ -1,13 +1,15 @@
 import React from "react";
 
-const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 48 48"
-    {...props}
-  >
-  
-  </svg>
+interface GoogleIconProps {
+  className?: string;
+}
+
+const GoogleIcon = ({ className }: GoogleIconProps) => (
+  <img
+    src="https://img.icons8.com/color/1200/google-logo.jpg"
+    alt="Google Icon"
+    className={className}
+  />
 );
 
 export default GoogleIcon;
