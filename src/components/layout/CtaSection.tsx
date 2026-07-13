@@ -16,13 +16,13 @@ export default function CtaSection() {
 
           <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
             <Link
-              href="/pages/contact"
+              href="/contact"
               className="px-8 py-3 bg-[#002855] text-white font-medium rounded-md hover:bg-[#003f8a] transition-colors text-center shadow-sm"
             >
               Book Now
             </Link>
             <Link
-              href="/pages/services"
+              href="/services"
               className="px-8 py-3 bg-transparent text-[#002855] font-medium rounded-md border border-[#002855] hover:bg-slate-300 transition-colors text-center"
             >
               View Services

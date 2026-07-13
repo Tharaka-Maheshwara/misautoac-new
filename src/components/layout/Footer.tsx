@@ -35,7 +35,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/pages/services"
+                  href="/services"
                   className="hover:text-blue-400 transition-colors"
                 >
                   Services
@@ -43,7 +43,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/pages/contact"
+                  href="/contact"
                   className="hover:text-blue-400 transition-colors"
                 >
                   Contact Us
@@ -51,7 +51,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/pages/about"
+                  href="/about"
                   className="hover:text-blue-400 transition-colors"
                 >
                   About Us
@@ -68,7 +68,7 @@ export default function Footer() {
             <ul className="space-y-4 text-base md:text-lg text-slate-400">
               <li>
                 <Link
-                  href="/pages/services"
+                  href="/services"
                   className="hover:text-blue-400 transition-colors"
                 >
                   Mist Auto A/C
@@ -76,7 +76,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/pages/services"
+                  href="/services"
                   className="hover:text-blue-400 transition-colors"
                 >
                   Domestic A/C & Refrigerator
@@ -84,7 +84,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/pages/services"
+                  href="/services"
                   className="hover:text-blue-400 transition-colors"
                 >
                   Spare Parts & Accessories
@@ -92,7 +92,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/pages/services"
+                  href="/services"
                   className="hover:text-blue-400 transition-colors"
                 >
                   Brand New AC Unit
@@ -100,7 +100,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/pages/services"
+                  href="/services"
                   className="hover:text-blue-400 transition-colors"
                 >
                   Auto Scanning
@@ -108,7 +108,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/pages/services"
+                  href="/services"
                   className="hover:text-blue-400 transition-colors"
                 >
                   Industrial Ref & AC

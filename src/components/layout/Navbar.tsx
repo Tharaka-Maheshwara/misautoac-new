@@ -11,20 +11,20 @@ import LogoutConfirmationModal from "../forms/LogoutConfirmationModal";
 
 // Dropdown Items Data
 const serviceDropdownItems = [
-  { label: "Auto AC", href: "/pages/services/auto-ac" },
-  { label: "Refrigerator", href: "/pages/services/refrigerator" },
-  { label: "Washing Machine", href: "/pages/services/washing-machine" },
-  { label: "Industrial", href: "/pages/services/industrial" },
+  { label: "Auto AC", href: "/services/auto-ac" },
+  { label: "Refrigerator", href: "/services/refrigerator" },
+  { label: "Washing Machine", href: "/services/washing-machine" },
+  { label: "Industrial", href: "/services/industrial" },
 ];
 
 const sparePartsDropdownItems = [
-  { label: "Auto AC", href: "/pages/spare-parts/auto-ac" },
-  { label: "Room AC", href: "/pages/spare-parts/room-ac" },
-  { label: "Refrigerator", href: "/pages/spare-parts/refrigerator" },
-  { label: "Washing Machine", href: "/pages/spare-parts/washing-machine" },
+  { label: "Auto AC", href: "/spare-parts/auto-ac" },
+  { label: "Room AC", href: "/spare-parts/room-ac" },
+  { label: "Refrigerator", href: "/spare-parts/refrigerator" },
+  { label: "Washing Machine", href: "/spare-parts/washing-machine" },
   {
     label: "Refrigerant & Accessories",
-    href: "/pages/spare-parts/refrigerant-and-accessories",
+    href: "/spare-parts/refrigerant-and-accessories",
   },
 ];
 
@@ -150,13 +150,13 @@ export default function Navbar() {
   const handleMyProfile = () => {
     setIsUserMenuOpen(false);
     // Navigate to profile page — update the path if different in your app
-    window.location.href = "/pages/profile";
+    window.location.href = "/profile";
   };
 
   const handleRateUs = () => {
     setIsUserMenuOpen(false);
     // Navigate to rate-us page or open a review link — update as needed
-    window.location.href = "/pages/rate-us";
+    window.location.href = "/rate-us";
   };
 
   const getDisplayName = () => {
@@ -265,7 +265,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   className={`flex items-center gap-1 rounded-lg px-4 py-2 text-base font-medium transition-all duration-200 ${
-                    pathname.startsWith("/pages/services")
+                    pathname.startsWith("/services")
                       ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                       : "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
                   }`}
@@ -314,9 +314,9 @@ export default function Navbar() {
               {/* 3. About Us Link */}
               <li>
                 <Link
-                  href="/pages/about"
+                  href="/about"
                   className={`relative block rounded-lg px-4 py-2 text-base font-medium transition-all duration-200 ${
-                    pathname === "/pages/about"
+                    pathname === "/about"
                       ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                       : "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
                   }`}
@@ -334,7 +334,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   className={`flex items-center gap-1 rounded-lg px-4 py-2 text-base font-medium transition-all duration-200 ${
-                    pathname.startsWith("/pages/spare-parts")
+                    pathname.startsWith("/spare-parts")
                       ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                       : "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
                   }`}
@@ -383,9 +383,9 @@ export default function Navbar() {
               {/* 5. Contact Link */}
               <li>
                 <Link
-                  href="/pages/contact"
+                  href="/contact"
                   className={`relative block rounded-lg px-4 py-2 text-base font-medium transition-all duration-200 ${
-                    pathname === "/pages/contact"
+                    pathname === "/contact"
                       ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                       : "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
                   }`}
@@ -590,7 +590,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsServicesMobileOpen((prev) => !prev)}
               className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
-                pathname.startsWith("/pages/services")
+                pathname.startsWith("/services")
                   ? "bg-slate-100 text-blue-700 font-semibold"
                   : "text-slate-700 hover:bg-blue-50"
               }`}
@@ -638,9 +638,9 @@ export default function Navbar() {
 
           {/* About Us */}
           <Link
-            href="/pages/about"
+            href="/about"
             className={`flex items-center rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
-              pathname === "/pages/about"
+              pathname === "/about"
                 ? "bg-blue-600 text-white shadow-md"
                 : "text-slate-700 hover:bg-blue-50"
             }`}
@@ -653,7 +653,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsSparePartsMobileOpen((prev) => !prev)}
               className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
-                pathname.startsWith("/pages/spare-parts")
+                pathname.startsWith("/spare-parts")
                   ? "bg-slate-100 text-blue-700 font-semibold"
                   : "text-slate-700 hover:bg-blue-50"
               }`}
@@ -701,9 +701,9 @@ export default function Navbar() {
 
           {/* Contact */}
           <Link
-            href="/pages/contact"
+            href="/contact"
             className={`flex items-center rounded-lg px-4 py-3 text-base font-medium transition-all duration-200 ${
-              pathname === "/pages/contact"
+              pathname === "/contact"
                 ? "bg-blue-600 text-white shadow-md"
                 : "text-slate-700 hover:bg-blue-50"
             }`}
@@ -735,7 +735,7 @@ export default function Navbar() {
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    window.location.href = "/pages/profile";
+                    window.location.href = "/profile";
                   }}
                   className="w-full text-left rounded-lg px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 border border-slate-200"
                 >
@@ -744,7 +744,7 @@ export default function Navbar() {
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    window.location.href = "/pages/rate-us";
+                    window.location.href = "/rate-us";
                   }}
                   className="w-full text-left rounded-lg px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 border border-slate-200"
                 >

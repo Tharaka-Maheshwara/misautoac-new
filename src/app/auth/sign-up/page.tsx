@@ -260,7 +260,7 @@ export default function SignupPage() {
         <div className="mt-6 text-center text-sm text-slate-600">
           Already have an account?{" "}
           <Link
-            href="/pages/login"
+            href="/auth/login"
             className="font-semibold text-blue-600 hover:text-blue-500"
           >
             Log in

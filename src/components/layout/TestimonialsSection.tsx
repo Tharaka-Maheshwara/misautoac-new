@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { getFeedbacks } from "@/lib/firebase";
+import { StarIcon } from "@heroicons/react/24/solid";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
+import { useKeenSlider } from "keen-slider/react";
+import "keen-slider/keen-slider.min.css";
 
 // Define the structure for a feedback item
 interface Feedback {
@@ -9,45 +17,91 @@ interface Feedback {
   name: string;
   message: string;
   rating: number;
-  // photoURL could be added here if we fetch it from the Users collection
+  createdAt: {
+    seconds: number;
+    nanoseconds: number;
+  };
 }
 
-// Skeleton component for loading state
-const TestimonialSkeleton = () => (
-  <div className="flex flex-col justify-between rounded-2xl bg-white p-10 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)] border border-slate-100">
-    <div>
-      <div className="h-10 w-10 bg-slate-200 rounded-md mb-6 animate-pulse"></div>
-      <div className="h-4 bg-slate-200 rounded w-full mb-2 animate-pulse"></div>
-      <div className="h-4 bg-slate-200 rounded w-5/6 mb-2 animate-pulse"></div>
-      <div className="h-4 bg-slate-200 rounded w-3/4 mb-8 animate-pulse"></div>
-      <div className="flex space-x-1 mb-8">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-5 w-5 bg-slate-200 rounded-full animate-pulse"></div>
-        ))}
+// --- Helper Functions ---
+const getInitials = (name: string) => {
+  if (!name) return "?";
+  const nameParts = name.split(" ");
+  if (nameParts.length > 1) {
+    return `${nameParts[0][0]}${
+      nameParts[nameParts.length - 1][0]
+    }`.toUpperCase();
+  }
+  return name[0]?.toUpperCase() || "?";
+};
+
+const formatDate = (timestamp: { seconds: number }) => {
+  if (!timestamp?.seconds) return "";
+  return new Date(timestamp.seconds * 1000).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+// --- Skeleton Components for Loading State ---
+const TestimonialCardSkeleton = () => (
+  <div className="keen-slider__slide p-2">
+    <div className="h-full rounded-lg border border-slate-200 bg-white p-6 animate-pulse">
+      <div className="flex items-center gap-4 mb-3">
+        <div className="h-12 w-12 rounded-full bg-slate-200"></div>
+        <div className="flex-1">
+          <div className="h-5 w-3/4 rounded bg-slate-200 mb-2"></div>
+          <div className="flex items-center gap-1">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-5 w-5 rounded-full bg-slate-200"></div>
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
-    <div className="flex items-center">
-      <div className="mr-4 h-14 w-14 rounded-full bg-slate-200 animate-pulse"></div>
-      <div>
-        <div className="h-5 w-24 bg-slate-200 rounded mb-2 animate-pulse"></div>
-        <div className="h-4 w-20 bg-slate-200 rounded animate-pulse"></div>
-      </div>
+      <div className="h-4 w-1/3 rounded bg-slate-200 mb-4"></div>
+      <div className="h-4 w-full rounded bg-slate-200 mb-2"></div>
+      <div className="h-4 w-5/6 rounded bg-slate-200"></div>
     </div>
   </div>
 );
 
+// --- Main Component ---
 export default function TestimonialsSection() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [averageRating, setAverageRating] = useState(0);
+
+  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
+    slides: {
+      perView: 3,
+      spacing: 16,
+    },
+    breakpoints: {
+      "(max-width: 1024px)": {
+        slides: { perView: 2, spacing: 16 },
+      },
+      "(max-width: 768px)": {
+        slides: { perView: 1, spacing: 16 },
+      },
+    },
+  });
 
   useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
         setIsLoading(true);
-        const fetchedData = await getFeedbacks(6); // Fetch latest 6 feedbacks
-        setFeedbacks(fetchedData as Feedback[]);
+        const fetchedData = (await getFeedbacks(9)) as Feedback[]; // Fetch more for the carousel
+        setFeedbacks(fetchedData);
+
+        if (fetchedData.length > 0) {
+          const totalRating = fetchedData.reduce(
+            (acc, curr) => acc + curr.rating,
+            0
+          );
+          setAverageRating(totalRating / fetchedData.length);
+        }
       } catch (err) {
         console.error("Error fetching feedbacks:", err);
         setError("Could not load testimonials at this time.");
@@ -59,136 +113,130 @@ export default function TestimonialsSection() {
     fetchFeedbacks();
   }, []);
 
-  const nextSlide = () => {
-    if (feedbacks.length === 0) return;
-    setCurrentIndex((prev) => (prev + 2 >= feedbacks.length ? 0 : prev + 2));
-  };
+  const renderStars = (rating: number, starSize = "h-5 w-5") => {
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
-  const prevSlide = () => {
-    if (feedbacks.length === 0) return;
-    setCurrentIndex((prev) =>
-      prev - 2 < 0 ? Math.max(0, feedbacks.length - 2) : prev - 2
+    return (
+      <div className="flex items-center gap-0.5">
+        {[...Array(fullStars)].map((_, i) => (
+          <StarIcon key={`full-${i}`} className={`${starSize} text-yellow-400`} />
+        ))}
+        {/* Note: The image doesn't show half stars, but this is a common feature.
+            For exact replication, we can round to nearest full star.
+            The image shows 4.3 with 4 full stars and one empty. So we floor it.
+        */}
+        {[...Array(5 - fullStars)].map((_, i) => (
+          <StarIcon
+            key={`empty-${i}`}
+            className={`${starSize} text-gray-300`}
+          />
+        ))}
+      </div>
     );
   };
 
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <>
-          <TestimonialSkeleton />
-          <TestimonialSkeleton />
-        </>
-      );
-    }
-
-    if (error) {
-      return (
-        <div className="md:col-span-2 text-center text-red-500 bg-red-50 p-8 rounded-2xl">
-          {error}
-        </div>
-      );
-    }
-
-    if (feedbacks.length === 0) {
-      return (
-        <div className="md:col-span-2 text-center text-slate-600 bg-slate-50 p-8 rounded-2xl">
-          No customer feedback available yet. Be the first to leave a review!
-        </div>
-      );
-    }
-
-    return feedbacks
-      .slice(currentIndex, currentIndex + 2)
-      .map((testimonial) => (
-        <div
-          key={testimonial.id}
-          className="flex flex-col justify-between rounded-2xl bg-white p-10 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.15)] border border-slate-100 text-left transition-all duration-300 hover:-translate-y-3 hover:shadow-2xl cursor-default"
-        >
-          <div>
-            <div className="mb-6 text-[#3b82f6] opacity-80">
-              <svg className="h-10 w-10" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-              </svg>
-            </div>
-            <p className="mb-8 text-slate-600 text-lg leading-relaxed">
-              {testimonial.message}
-            </p>
-            <div className="mb-8 flex space-x-1 text-amber-400">
-              {[...Array(5)].map((_, i) => (
-                <svg
-                  key={i}
-                  className={`h-5 w-5 ${i < testimonial.rating ? "fill-current" : "fill-current text-gray-300"}`}
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center">
-            <div className="mr-4 h-14 w-14 rounded-full bg-gradient-to-br from-[#3b82f6] to-[#1e66c9] shadow-inner flex items-center justify-center text-white font-bold text-xl">
-              {testimonial.name.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h4 className="text-lg font-bold text-slate-900">
-                {testimonial.name}
-              </h4>
-              <p className="text-sm font-medium text-[#1e66c9]">
-                Valued Customer
-              </p>
-            </div>
-          </div>
-        </div>
-      ));
-  };
-
   return (
-    <section className="w-full bg-white py-24">
-      <div className="mx-auto max-w-[1200px] px-6 md:px-12 text-center">
-        <h2 className="mb-14 text-3xl font-bold text-slate-900 sm:text-4xl">
-          What Our Customers Say
-        </h2>
-        <div className="relative flex items-center justify-center">
-          <button
-            onClick={prevSlide}
-            disabled={isLoading || feedbacks.length <= 2}
-            className="absolute -left-4 md:-left-8 lg:-left-12 z-10 hidden md:flex h-12 w-12 items-center justify-center rounded-full bg-[#1e66c9] text-white shadow-lg transition-transform hover:scale-110 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <svg className="h-6 w-6 pr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <div className="grid w-full grid-cols-1 gap-8 md:grid-cols-2 min-h-[450px]">
-            {renderContent()}
+    <section className="w-full bg-slate-50 py-20 sm:py-28">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Header */}
+        <div className="mx-auto max-w-2xl text-center">
+          <div className="flex justify-center mb-4">
+            <span className="p-3 bg-yellow-100 rounded-full">
+              <StarIcon className="h-8 w-8 text-yellow-500" />
+            </span>
           </div>
-          <button
-            onClick={nextSlide}
-            disabled={isLoading || feedbacks.length <= 2}
-            className="absolute -right-4 md:-right-8 lg:-right-12 z-10 hidden md:flex h-12 w-12 items-center justify-center rounded-full bg-[#1e66c9] text-white shadow-lg transition-transform hover:scale-110 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <svg className="h-6 w-6 pl-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            What our clients say
+          </h2>
+          <p className="mt-4 text-lg leading-8 text-gray-600">
+            Real feedback from people who've used our service.
+          </p>
         </div>
-        {!isLoading && !error && feedbacks.length > 0 && (
-          <div className="mt-12 flex justify-center space-x-2">
-            {Array.from({ length: Math.ceil(feedbacks.length / 2) }).map(
-              (_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentIndex(idx * 2)}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    currentIndex === idx * 2
-                      ? "w-8 bg-[#1e66c9]"
-                      : "w-2.5 bg-slate-300"
-                  }`}
-                  aria-label={`Go to slide ${idx + 1}`}
-                ></button>
-              )
+
+        {/* Summary Box */}
+        <div className="mt-12 mx-auto max-w-4xl">
+          <div className="rounded-lg border border-slate-200 bg-white shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <p className="text-5xl font-bold text-gray-900">
+                {averageRating.toFixed(1)}
+              </p>
+              <div>
+                {renderStars(averageRating, "h-6 w-6")}
+                <p className="mt-1 text-sm text-gray-600">
+                  Based on {feedbacks.length} ratings
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/feedback"
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-x-2 rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            >
+              <StarIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
+              Leave your rating
+            </Link>
+          </div>
+        </div>
+
+        {/* Testimonials Carousel */}
+        <div className="mt-16 relative">
+          <div ref={sliderRef} className="keen-slider">
+            {isLoading ? (
+              [...Array(3)].map((_, i) => <TestimonialCardSkeleton key={i} />)
+            ) : error ? (
+              <div className="keen-slider__slide text-center text-red-500 col-span-full">
+                {error}
+              </div>
+            ) : feedbacks.length === 0 ? (
+              <div className="keen-slider__slide text-center text-gray-500 col-span-full">
+                No feedback yet.
+              </div>
+            ) : (
+              feedbacks.map((fb) => (
+                <div key={fb.id} className="keen-slider__slide p-2">
+                  <div className="h-full rounded-lg border border-slate-200 bg-white p-6 flex flex-col">
+                    <div className="flex items-start gap-4 mb-3">
+                      <div className="h-12 w-12 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-lg shrink-0">
+                        {getInitials(fb.name)}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900">{fb.name}</h3>
+                        {renderStars(fb.rating)}
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-4 ml-16">
+                      {formatDate(fb.createdAt)}
+                    </p>
+                    <p className="text-gray-700 leading-relaxed">
+                      {`"${fb.message}"`}
+                    </p>
+                  </div>
+                </div>
+              ))
             )}
           </div>
-        )}
+
+          {/* Carousel Arrows */}
+          {instanceRef.current && feedbacks.length > 3 && (
+            <>
+              <button
+                onClick={(e) => e.stopPropagation() || instanceRef.current?.prev()}
+                className="absolute top-1/2 -translate-y-1/2 -left-4 h-10 w-10 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-gray-600 hover:bg-slate-50 disabled:opacity-50"
+                disabled={isLoading}
+              >
+                <ChevronLeftIcon className="h-6 w-6" />
+              </button>
+              <button
+                onClick={(e) => e.stopPropagation() || instanceRef.current?.next()}
+                className="absolute top-1/2 -translate-y-1/2 -right-4 h-10 w-10 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-gray-600 hover:bg-slate-50 disabled:opacity-50"
+                disabled={isLoading}
+              >
+                <ChevronRightIcon className="h-6 w-6" />
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </section>
   );
