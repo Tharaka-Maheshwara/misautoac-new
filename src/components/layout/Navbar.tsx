@@ -486,13 +486,13 @@ export default function Navbar() {
             ) : (
               <>
                 <Link
-                  href="/pages/login"
+                  href="/auth/login"
                   className="rounded-lg px-4 py-2 text-base font-medium text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-slate-900"
                 >
                   Login
                 </Link>
                 <Link
-                  href="/pages/sign-up"
+                  href="/auth/sign-up"
                   className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2 text-base font-semibold text-white shadow-sm shadow-blue-200 transition-all duration-200 hover:bg-blue-700 hover:shadow-md hover:shadow-blue-300 active:scale-95"
                 >
                   Sign Up
@@ -759,16 +759,17 @@ export default function Navbar() {
               </div>
             </>
           ) : (
+            
             <div className="flex flex-col gap-2 px-4">
               <Link
-                href="/pages/login"
+                href="/auth/login"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-base font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 text-center"
               >
                 Login
               </Link>
               <Link
-                href="/pages/sign-up"
+                href="/auth/sign-up"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 active:scale-95 text-center"
               >
