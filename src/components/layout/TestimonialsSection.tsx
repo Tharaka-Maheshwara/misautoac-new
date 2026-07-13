@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getFeedbacks } from "@/lib/firebase";
+import { useAuth } from "@/context/AuthContext"; // Import useAuth
 import { StarIcon } from "@heroicons/react/24/solid";
 import {
   ChevronLeftIcon,
@@ -48,18 +49,13 @@ const formatDate = (timestamp: { seconds: number }) => {
 const TestimonialCardSkeleton = () => (
   <div className="keen-slider__slide p-2">
     <div className="h-full rounded-lg border border-slate-200 bg-white p-6 animate-pulse">
-      <div className="flex items-center gap-4 mb-3">
-        <div className="h-12 w-12 rounded-full bg-slate-200"></div>
+      <div className="flex items-center gap-4 mb-4">
+        <div className="h-10 w-10 rounded-full bg-slate-200"></div>
         <div className="flex-1">
           <div className="h-5 w-3/4 rounded bg-slate-200 mb-2"></div>
-          <div className="flex items-center gap-1">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-5 w-5 rounded-full bg-slate-200"></div>
-            ))}
-          </div>
+          <div className="h-4 w-1/2 rounded bg-slate-200"></div>
         </div>
       </div>
-      <div className="h-4 w-1/3 rounded bg-slate-200 mb-4"></div>
       <div className="h-4 w-full rounded bg-slate-200 mb-2"></div>
       <div className="h-4 w-5/6 rounded bg-slate-200"></div>
     </div>
@@ -68,6 +64,7 @@ const TestimonialCardSkeleton = () => (
 
 // --- Main Component ---
 export default function TestimonialsSection() {
+  const { user } = useAuth(); // Get user status
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +73,7 @@ export default function TestimonialsSection() {
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
     slides: {
       perView: 3,
-      spacing: 16,
+      spacing: 24,
     },
     breakpoints: {
       "(max-width: 1024px)": {
@@ -92,7 +89,7 @@ export default function TestimonialsSection() {
     const fetchFeedbacks = async () => {
       try {
         setIsLoading(true);
-        const fetchedData = (await getFeedbacks(9)) as Feedback[]; // Fetch more for the carousel
+        const fetchedData = (await getFeedbacks(9)) as Feedback[];
         setFeedbacks(fetchedData);
 
         if (fetchedData.length > 0) {
@@ -115,18 +112,11 @@ export default function TestimonialsSection() {
 
   const renderStars = (rating: number, starSize = "h-5 w-5") => {
     const fullStars = Math.floor(rating);
-    const halfStar = rating % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-
     return (
       <div className="flex items-center gap-0.5">
         {[...Array(fullStars)].map((_, i) => (
           <StarIcon key={`full-${i}`} className={`${starSize} text-yellow-400`} />
         ))}
-        {/* Note: The image doesn't show half stars, but this is a common feature.
-            For exact replication, we can round to nearest full star.
-            The image shows 4.3 with 4 full stars and one empty. So we floor it.
-        */}
         {[...Array(5 - fullStars)].map((_, i) => (
           <StarIcon
             key={`empty-${i}`}
@@ -138,7 +128,7 @@ export default function TestimonialsSection() {
   };
 
   return (
-    <section className="w-full bg-slate-50 py-20 sm:py-28">
+    <section className="w-full bg-white py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Header */}
         <div className="mx-auto max-w-2xl text-center">
@@ -156,11 +146,11 @@ export default function TestimonialsSection() {
         </div>
 
         {/* Summary Box */}
-        <div className="mt-12 mx-auto max-w-4xl">
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="mt-16 mx-auto max-w-5xl">
+          <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <p className="text-5xl font-bold text-gray-900">
-                {averageRating.toFixed(1)}
+                {averageRating > 0 ? averageRating.toFixed(1) : "N/A"}
               </p>
               <div>
                 {renderStars(averageRating, "h-6 w-6")}
@@ -170,11 +160,11 @@ export default function TestimonialsSection() {
               </div>
             </div>
             <Link
-              href="/feedback"
+              href={user ? "/feedback" : "/auth/login"}
               className="inline-flex w-full sm:w-auto items-center justify-center gap-x-2 rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
               <StarIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-              Leave your rating
+              {user ? "Leave your rating" : "Sign in to rate"}
             </Link>
           </div>
         </div>
@@ -189,27 +179,28 @@ export default function TestimonialsSection() {
                 {error}
               </div>
             ) : feedbacks.length === 0 ? (
-              <div className="keen-slider__slide text-center text-gray-500 col-span-full">
-                No feedback yet.
+              <div className="keen-slider__slide text-center text-gray-500 col-span-full py-12">
+                No feedback yet. Be the first to leave a rating!
               </div>
             ) : (
               feedbacks.map((fb) => (
-                <div key={fb.id} className="keen-slider__slide p-2">
-                  <div className="h-full rounded-lg border border-slate-200 bg-white p-6 flex flex-col">
-                    <div className="flex items-start gap-4 mb-3">
-                      <div className="h-12 w-12 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-lg shrink-0">
+                <div key={fb.id} className="keen-slider__slide group">
+                  <div className="h-full rounded-lg border border-gray-200 bg-white p-6 flex flex-col transition-shadow duration-300 group-hover:shadow-lg">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="h-11 w-11 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-md shrink-0">
                         {getInitials(fb.name)}
                       </div>
-                      <div className="flex-1">
+                      <div>
                         <h3 className="font-bold text-gray-900">{fb.name}</h3>
-                        {renderStars(fb.rating)}
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          {renderStars(fb.rating, "h-4 w-4")}
+                          <span className="text-gray-400">•</span>
+                          <span>{formatDate(fb.createdAt)}</span>
+                        </div>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-500 mb-4 ml-16">
-                      {formatDate(fb.createdAt)}
-                    </p>
-                    <p className="text-gray-700 leading-relaxed">
-                      {`"${fb.message}"`}
+                    <p className="text-gray-600 leading-relaxed">
+                      {fb.message}
                     </p>
                   </div>
                 </div>
@@ -222,17 +213,17 @@ export default function TestimonialsSection() {
             <>
               <button
                 onClick={(e) => e.stopPropagation() || instanceRef.current?.prev()}
-                className="absolute top-1/2 -translate-y-1/2 -left-4 h-10 w-10 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-gray-600 hover:bg-slate-50 disabled:opacity-50"
+                className="absolute top-1/2 -translate-y-1/2 -left-3 h-9 w-9 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 disabled={isLoading}
               >
-                <ChevronLeftIcon className="h-6 w-6" />
+                <ChevronLeftIcon className="h-5 w-5" />
               </button>
               <button
                 onClick={(e) => e.stopPropagation() || instanceRef.current?.next()}
-                className="absolute top-1/2 -translate-y-1/2 -right-4 h-10 w-10 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center text-gray-600 hover:bg-slate-50 disabled:opacity-50"
+                className="absolute top-1/2 -translate-y-1/2 -right-3 h-9 w-9 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 disabled={isLoading}
               >
-                <ChevronRightIcon className="h-6 w-6" />
+                <ChevronRightIcon className="h-5 w-5" />
               </button>
             </>
           )}
