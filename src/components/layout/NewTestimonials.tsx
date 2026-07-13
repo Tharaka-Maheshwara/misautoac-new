@@ -79,7 +79,7 @@ export default function NewTestimonials() {
     const fetchFeedbacks = async () => {
       try {
         setIsLoading(true);
-        const fetchedData = (await getFeedbacks(6)) as Feedback[]; // Fetch 6 for a 3-per-view carousel
+        const fetchedData = (await getFeedbacks(5)) as Feedback[]; // Fetch 5 for debugging
         setFeedbacks(fetchedData);
       } catch (err) {
         console.error("Error fetching feedbacks:", err);
