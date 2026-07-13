@@ -32,21 +32,21 @@ const getInitials = (name: string) => {
 
 // --- Skeleton Components for Loading State ---
 const TestimonialCardSkeleton = () => (
-  <div className="keen-slider__slide p-4">
-    <div className="h-full rounded-2xl border border-slate-200/80 bg-white p-8 shadow-lg animate-pulse">
-      <div className="h-8 w-8 rounded-full bg-slate-200 mb-4"></div>
-      <div className="h-4 w-full rounded bg-slate-200 mb-2"></div>
-      <div className="h-4 w-5/6 rounded bg-slate-200 mb-6"></div>
-      <div className="flex items-center gap-1 mb-6">
+  <div className="keen-slider__slide p-2">
+    <div className="h-full rounded-xl border border-slate-200/80 bg-white p-5 shadow-md animate-pulse">
+      <div className="h-6 w-6 rounded-full bg-slate-200 mb-2"></div>
+      <div className="h-3 w-full rounded bg-slate-200 mb-2"></div>
+      <div className="h-3 w-5/6 rounded bg-slate-200 mb-3"></div>
+      <div className="flex items-center gap-1 mb-3">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-5 w-5 rounded-full bg-slate-200"></div>
+          <div key={i} className="h-4 w-4 rounded-full bg-slate-200"></div>
         ))}
       </div>
-      <div className="flex items-center gap-4">
-        <div className="h-12 w-12 rounded-full bg-slate-200"></div>
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-full bg-slate-200"></div>
         <div className="flex-1">
-          <div className="h-5 w-3/4 rounded bg-slate-200 mb-2"></div>
-          <div className="h-4 w-1/2 rounded bg-slate-200"></div>
+          <div className="h-4 w-3/4 rounded bg-slate-200 mb-2"></div>
+          <div className="h-3 w-1/2 rounded bg-slate-200"></div>
         </div>
       </div>
     </div>
@@ -62,11 +62,14 @@ export default function NewTestimonials() {
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
     loop: true,
     slides: {
-      perView: 2,
-      spacing: 24,
+      perView: 3,
+      spacing: 16, // Reduced spacing
     },
     breakpoints: {
       "(max-width: 1024px)": {
+        slides: { perView: 2, spacing: 16 },
+      },
+      "(max-width: 768px)": {
         slides: { perView: 1, spacing: 16 },
       },
     },
@@ -76,7 +79,7 @@ export default function NewTestimonials() {
     const fetchFeedbacks = async () => {
       try {
         setIsLoading(true);
-        const fetchedData = (await getFeedbacks(9)) as Feedback[];
+        const fetchedData = (await getFeedbacks(6)) as Feedback[]; // Fetch 6 for a 3-per-view carousel
         setFeedbacks(fetchedData);
       } catch (err) {
         console.error("Error fetching feedbacks:", err);
@@ -96,7 +99,7 @@ export default function NewTestimonials() {
         {[...Array(5)].map((_, i) => (
           <StarIcon
             key={i}
-            className={`w-5 h-5 ${
+            className={`w-4 h-4 ${ // Slightly smaller stars
               i < fullStars ? "text-yellow-400" : "text-gray-300"
             }`}
           />
@@ -107,7 +110,7 @@ export default function NewTestimonials() {
 
   return (
     <section className="w-full bg-white py-20 sm:py-28">
-      <div className="mx-auto max-w-6xl px-6 lg:px-8">
+      <div className="mx-auto max-w-[1500px] px-6 lg:px-8"> {/* Increased max-width */}
         {/* Header */}
         <div className="mb-16 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -120,36 +123,36 @@ export default function NewTestimonials() {
         <div className="relative">
           <div ref={sliderRef} className="keen-slider">
             {isLoading ? (
-              [...Array(2)].map((_, i) => <TestimonialCardSkeleton key={i} />)
+              [...Array(3)].map((_, i) => <TestimonialCardSkeleton key={i} />)
             ) : error ? (
-              <div className="keen-slider__slide text-center text-red-500 col-span-full">
+              <div className="keen-slider__slide text-center text-red-500 col-span-full py-12">
                 {error}
               </div>
             ) : feedbacks.length === 0 ? (
-              <div className="keen-slider__slide text-center text-gray-500 col-span-full">
+              <div className="keen-slider__slide text-center text-gray-500 col-span-full py-12">
                 Be the first to leave a review!
               </div>
             ) : (
               feedbacks.map((fb) => (
-                <div key={fb.id} className="keen-slider__slide p-4">
-                  <div className="flex h-full flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-8 shadow-lg">
+                <div key={fb.id} className="keen-slider__slide p-2">
+                  <div className="flex h-full flex-col justify-between rounded-xl border border-slate-200/80 bg-white p-5 shadow-md"> {/* Reduced padding */}
                     <div>
-                      <span className="text-5xl font-bold text-blue-500">“</span>
-                      <p className="mt-4 text-base text-gray-600">
+                      <span className="text-3xl font-bold text-blue-500">“</span>
+                      <p className="mt-1 text-sm text-gray-600"> {/* Reduced margin and text size */}
                         {fb.message}
                       </p>
                     </div>
-                    <div className="mt-8">
+                    <div className="mt-4"> {/* Reduced margin */}
                       {renderStars(fb.rating)}
-                      <div className="mt-6 flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500 text-white font-bold text-lg">
+                      <div className="mt-3 flex items-center gap-3"> {/* Reduced margin */}
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-white font-bold text-base">
                           {getInitials(fb.name)}
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900">
+                          <p className="font-semibold text-gray-900 text-sm">
                             {fb.name}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-xs text-gray-500"> {/* Smaller text */}
                             Valued Customer
                           </p>
                         </div>
@@ -162,7 +165,7 @@ export default function NewTestimonials() {
           </div>
 
           {/* Carousel Arrows */}
-          {instanceRef.current && feedbacks.length > 2 && (
+          {instanceRef.current && feedbacks.length > 3 && (
             <>
               <button
                 onClick={(e) => e.stopPropagation() || instanceRef.current?.prev()}
