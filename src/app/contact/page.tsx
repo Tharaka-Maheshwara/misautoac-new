@@ -1,7 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import emailjs from "@emailjs/browser";
+import {
+  CheckCircleIcon,
+  ClockIcon,
+  EnvelopeIcon,
+  ExclamationCircleIcon,
+  MapPinIcon,
+  PaperAirplaneIcon,
+  PhoneIcon,
+  ShieldCheckIcon,
+} from "@heroicons/react/24/outline";
 import { useAuth } from "@/context/AuthContext";
+
+type SubmitStatus = "idle" | "success" | "error";
+
+const inputClassName =
+  "w-full rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3.5 text-sm text-slate-900 outline-none transition duration-200 placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10";
 
 export default function ContactPage() {
   const { user } = useAuth();
@@ -11,334 +27,410 @@ export default function ContactPage() {
     phone: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
+  const [submitMessage, setSubmitMessage] = useState("");
 
   useEffect(() => {
-    if (user) {
-      setFormData((prevData) => ({
-        ...prevData,
-        fullName: user.displayName || "",
-        email: user.email || "",
-      }));
-    }
+    if (!user) return;
+
+    setFormData((previous) => ({
+      ...previous,
+      fullName: user.displayName || "",
+      email: user.email || "",
+    }));
   }, [user]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const { id, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+    const { id, value } = event.target;
+
+    setFormData((previous) => ({
+      ...previous,
       [id]: value,
     }));
+
+    if (submitStatus !== "idle") {
+      setSubmitStatus("idle");
+      setSubmitMessage("");
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isSubmitting) return;
+
+    const fullName = formData.fullName.trim();
+    const customerEmail = formData.email.trim();
+    const phone = formData.phone.trim();
+    const message = formData.message.trim();
+
+    if (!fullName || !customerEmail || !message) {
+      setSubmitStatus("error");
+      setSubmitMessage("Please complete your name, email, and message.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus("idle");
+    setSubmitMessage("");
+
+    try {
+      const serviceId = process.env.NEXT_PUBLIC_CONTACT_EMAILJS_SERVICE_ID;
+      const templateId = process.env.NEXT_PUBLIC_CONTACT_EMAILJS_TEMPLATE_ID;
+      const publicKey = process.env.NEXT_PUBLIC_CONTACT_EMAILJS_PUBLIC_KEY;
+
+      if (!serviceId || !templateId || !publicKey) {
+        throw new Error("Contact EmailJS environment variables are missing.");
+      }
+
+      const submittedAt = new Intl.DateTimeFormat("en-GB", {
+        dateStyle: "full",
+        timeStyle: "short",
+        timeZone: "Asia/Colombo",
+      }).format(new Date());
+
+      await emailjs.send(
+        serviceId,
+        templateId,
+        {
+          full_name: fullName,
+          customer_email: customerEmail,
+          phone: phone || "Not provided",
+          message,
+          submitted_at: submittedAt,
+
+          // Compatibility with EmailJS's original Contact Us template.
+          name: fullName,
+          email: customerEmail,
+          title: "Website contact enquiry",
+          time: submittedAt,
+        },
+        { publicKey },
+      );
+
+      setSubmitStatus("success");
+      setSubmitMessage(
+        "Your message has been sent successfully. We will contact you soon.",
+      );
+      setFormData({
+        fullName: user?.displayName || "",
+        email: user?.email || "",
+        phone: "",
+        message: "",
+      });
+    } catch (error: unknown) {
+      const emailError = error as { status?: number; text?: string };
+
+      console.error("Contact email failed:", {
+        status: emailError?.status,
+        message:
+          emailError?.text ??
+          (error instanceof Error ? error.message : "Unknown EmailJS error"),
+      });
+
+      setSubmitStatus("error");
+      setSubmitMessage(
+        "Your message could not be sent. Please try again in a moment.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <main className="flex flex-col min-h-screen">
-      {/* Contact Header Section */}
-      <section
-        className="relative text-white py-24 px-4 text-center bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: "url('/Hero Section images/hero_slide_1.jpg')",
-        }}
-      >
-        <div className="absolute inset-0 bg-[#042f56]/80 mix-blend-multiply"></div>
-        <div className="relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-md">
-            Contact Us
+    <main className="min-h-screen bg-[#eef3f9] text-slate-900">
+      {/* Brand-matched hero */}
+      <section className="relative isolate overflow-hidden bg-[#0f172a] px-6 pb-28 pt-24 text-white sm:pb-32 sm:pt-28 lg:px-8">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_10%,rgba(37,99,235,0.26),transparent_34%),radial-gradient(circle_at_85%_65%,rgba(14,165,233,0.16),transparent_30%)]" />
+        <div className="absolute inset-x-0 bottom-0 -z-10 h-px bg-gradient-to-r from-transparent via-blue-400/60 to-transparent" />
+
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-blue-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+            <EnvelopeIcon className="h-4 w-4" aria-hidden="true" />
+            Contact Support
+          </div>
+
+          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+            Let&apos;s get your comfort
+            <span className="block bg-gradient-to-r from-blue-300 to-sky-400 bg-clip-text text-transparent">
+              back on the road.
+            </span>
           </h1>
-          <p className="text-sm md:text-base text-gray-200 max-w-2xl mx-auto leading-relaxed">
-            Experience the ultimate chill. Our expert engineering team is
-            standing by to
-            <br className="hidden md:block" />
-            restore your vehicle's performance and comfort.
+
+          <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+            Send our vehicle air-conditioning specialists a message. Share what
+            you are experiencing, and the Mist Auto A/C team will respond as
+            soon as possible.
           </p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs font-medium text-slate-300 sm:text-sm">
+            <span className="inline-flex items-center gap-2">
+              <CheckCircleIcon className="h-5 w-5 text-blue-400" />
+              Expert technical guidance
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <ShieldCheckIcon className="h-5 w-5 text-blue-400" />
+              Your information stays private
+            </span>
+          </div>
         </div>
       </section>
 
-      {/* Rest of the page content can go here */}
-      <div className="flex-1 p-4 md:p-12 lg:p-16 bg-gray-50 flex justify-center items-start -mt-8 relative z-10">
-        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-          {/* Left Column: Form */}
-          <div className="bg-white rounded-xl shadow-2xl p-8 md:p-10 lg:col-span-3 transform hover:-translate-y-1 transition-all duration-300">
-            <h2 className="text-2xl font-bold text-[#14304b] mb-6">
-              Send Us a Message
-            </h2>
+      {/* Contact content */}
+      <section className="relative z-10 -mt-16 px-4 pb-20 sm:-mt-20 sm:px-6 lg:px-8 lg:pb-28">
+        <div className="mx-auto grid max-w-6xl overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-[0_30px_80px_-35px_rgba(15,23,42,0.45)] lg:grid-cols-[1.35fr_0.85fr]">
+          {/* Form panel */}
+          <div className="p-6 sm:p-9 lg:p-12">
+            <div className="mb-8 flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 shadow-[inset_0_0_0_1px_rgba(37,99,235,0.08)]">
+                <PaperAirplaneIcon className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-600">
+                  Message our team
+                </p>
+                <h2 className="mt-1 text-2xl font-bold tracking-tight text-[#14304b] sm:text-3xl">
+                  How can we help?
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Complete the form below and we&apos;ll get back to you
+                  shortly.
+                </p>
+              </div>
+            </div>
 
-            <form className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Full Name */}
+            <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+              <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label
                     htmlFor="fullName"
-                    className="block text-sm font-medium text-gray-500 mb-2"
+                    className="mb-2 block text-sm font-semibold text-slate-700"
                   >
-                    Full Name
+                    Full Name <span className="text-blue-600">*</span>
                   </label>
                   <input
                     type="text"
                     id="fullName"
+                    name="fullName"
                     placeholder="John Doe"
                     value={formData.fullName}
                     onChange={handleInputChange}
-                    className="w-full bg-gray-50 border border-transparent focus:border-gray-200 focus:bg-white focus:ring-0 rounded-lg py-3 px-4 text-gray-700 outline-none transition-colors"
+                    autoComplete="name"
+                    required
+                    className={inputClassName}
                   />
                 </div>
 
-                {/* Email Address */}
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-gray-500 mb-2"
+                    className="mb-2 block text-sm font-semibold text-slate-700"
                   >
-                    Email Address
+                    Email Address <span className="text-blue-600">*</span>
                   </label>
                   <input
                     type="email"
                     id="email"
+                    name="email"
                     placeholder="john@example.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full bg-gray-50 border border-transparent focus:border-gray-200 focus:bg-white focus:ring-0 rounded-lg py-3 px-4 text-gray-700 outline-none transition-colors"
+                    autoComplete="email"
+                    required
+                    className={inputClassName}
                   />
                 </div>
               </div>
 
-              {/* Phone Number */}
               <div>
                 <label
                   htmlFor="phone"
-                  className="block text-sm font-medium text-gray-500 mb-2"
+                  className="mb-2 block text-sm font-semibold text-slate-700"
                 >
                   Phone Number
+                  <span className="ml-2 text-xs font-normal text-slate-400">
+                    Optional
+                  </span>
                 </label>
                 <input
                   type="tel"
                   id="phone"
-                  placeholder="(555) 000-0000"
+                  name="phone"
+                  placeholder="+94 7X XXX XXXX"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full bg-gray-50 border border-transparent focus:border-gray-200 focus:bg-white focus:ring-0 rounded-lg py-3 px-4 text-gray-700 outline-none transition-colors"
+                  autoComplete="tel"
+                  className={inputClassName}
                 />
               </div>
 
-              {/* Your Message */}
               <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium text-gray-500 mb-2"
-                >
-                  Your Message
-                </label>
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label
+                    htmlFor="message"
+                    className="block text-sm font-semibold text-slate-700"
+                  >
+                    Your Message <span className="text-blue-600">*</span>
+                  </label>
+                  <span className="text-xs text-slate-400">
+                    {formData.message.length}/1000
+                  </span>
+                </div>
                 <textarea
                   id="message"
-                  rows={5}
-                  placeholder="How can we help you today?"
+                  name="message"
+                  rows={6}
+                  maxLength={1000}
+                  placeholder="Tell us about the issue with your vehicle A/C..."
                   value={formData.message}
                   onChange={handleInputChange}
-                  className="w-full bg-gray-50 border border-transparent focus:border-gray-200 focus:bg-white focus:ring-0 rounded-lg py-3 px-4 text-gray-700 outline-none transition-colors resize-y"
-                ></textarea>
+                  required
+                  className={`${inputClassName} min-h-40 resize-y`}
+                />
               </div>
 
-              {/* Submit Button */}
-              <div>
-                <button
-                  type="submit"
-                  className="bg-[#0b355e] hover:bg-[#082a4d] text-white font-medium py-3 px-8 rounded-lg transition-colors"
+              {submitStatus !== "idle" && (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className={`flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm leading-6 ${
+                    submitStatus === "success"
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border-red-200 bg-red-50 text-red-800"
+                  }`}
                 >
-                  Send Message
-                </button>
-              </div>
+                  {submitStatus === "success" ? (
+                    <CheckCircleIcon className="mt-0.5 h-5 w-5 shrink-0" />
+                  ) : (
+                    <ExclamationCircleIcon className="mt-0.5 h-5 w-5 shrink-0" />
+                  )}
+                  <span>{submitMessage}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-4 text-sm font-bold text-white shadow-[0_14px_30px_-12px_rgba(37,99,235,0.8)] transition duration-200 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-[0_18px_34px_-12px_rgba(37,99,235,0.9)] focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:w-auto"
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    Sending Message...
+                  </>
+                ) : (
+                  <>
+                    Send Message
+                    <PaperAirplaneIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </>
+                )}
+              </button>
             </form>
           </div>
 
-          {/* Right Column: Contact Info */}
-          <div className="bg-[#042f56] text-white rounded-xl shadow-sm p-8 md:p-10 lg:col-span-2 flex flex-col justify-between">
-            <div>
-              <h2 className="text-2xl font-bold mb-8">Get in Touch</h2>
+          {/* Information panel */}
+          <aside className="relative overflow-hidden bg-[#0f172a] p-7 text-white sm:p-10 lg:p-12">
+            <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-blue-600/20 blur-3xl" />
+            <div className="absolute -bottom-28 -left-28 h-64 w-64 rounded-full bg-sky-500/10 blur-3xl" />
 
-              <div className="space-y-8">
-                {/* Location */}
-                <div className="flex items-start">
-                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 shrink-0">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
+            <div className="relative">
+              <div className="inline-flex rounded-full border border-blue-300/20 bg-blue-400/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-blue-200">
+                Mist Auto A/C
+              </div>
+              <h2 className="mt-5 text-2xl font-bold tracking-tight">
+                Get in touch directly
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-slate-300">
+                Prefer to contact us directly? Use any of the options below.
+              </p>
+
+              <div className="mt-9 space-y-7">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-blue-300 ring-1 ring-white/10">
+                    <MapPinIcon className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm text-blue-200 mb-1">Location</h3>
-                    <p className="text-white text-md">
-                      123 Luxury Lane, Auto City, ST 12345
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      Location
+                    </p>
+                    <p className="mt-1 text-sm font-semibold leading-6 text-white">
+                      Mist Auto A/C Service Centre
+                      <br />
+                      Sri Lanka
                     </p>
                   </div>
                 </div>
 
-                {/* Phone */}
-                <div className="flex items-start">
-                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 shrink-0">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                      />
-                    </svg>
+                <div className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-blue-300 ring-1 ring-white/10">
+                    <PhoneIcon className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm text-blue-200 mb-1">Phone</h3>
-                    <p className="text-white text-md">(555) 123-4567</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      Phone
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-white">
+                      Contact us for assistance
+                    </p>
                   </div>
                 </div>
 
-                {/* Email */}
-                <div className="flex items-start">
-                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 shrink-0">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                      />
-                    </svg>
+                <div className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-blue-300 ring-1 ring-white/10">
+                    <EnvelopeIcon className="h-5 w-5" />
                   </div>
-                  <div>
-                    <h3 className="text-sm text-blue-200 mb-1">Email</h3>
-                    <p className="text-white text-md">info@cooldrive.com</p>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      Email
+                    </p>
+                    <a
+                      href="mailto:tharakamahesh806@gmail.com"
+                      className="mt-1 block break-all text-sm font-semibold text-white transition hover:text-blue-300"
+                    >
+                      tharakamahesh806@gmail.com
+                    </a>
                   </div>
                 </div>
 
-                {/* Working Hours */}
-                <div className="flex items-start">
-                  <div className="bg-white text-[#042f56] p-3 rounded-full mr-4 shrink-0">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
+                <div className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-blue-300 ring-1 ring-white/10">
+                    <ClockIcon className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm text-blue-200 mb-1">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                       Working Hours
-                    </h3>
-                    <p className="text-white text-md">
-                      Mon - Sat: 8:00 AM - 6:00 PM
                     </p>
-                    <p className="text-white text-md mt-1">
-                      Sunday: <span className="text-red-500">Closed</span>
+                    <p className="mt-1 text-sm font-semibold leading-6 text-white">
+                      Monday – Saturday
+                      <br />
+                      8:00 AM – 6:00 PM
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-rose-300">
+                      Sunday: Closed
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                <div className="flex items-start gap-3">
+                  <ShieldCheckIcon className="mt-0.5 h-5 w-5 shrink-0 text-blue-300" />
+                  <div>
+                    <p className="text-sm font-bold">Secure contact form</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-400">
+                      Your details are only used to respond to your service
+                      enquiry.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-
-            <div>
-              <hr className="border-[#174676] my-8" />
-              <h3 className="text-sm text-white mb-4">Follow Our Updates</h3>
-              <div className="flex gap-4">
-                {/* Facebook */}
-                <a
-                  href="#"
-                  className="w-10 h-10 flex items-center justify-center rounded-full border border-[#174676] hover:bg-[#174676] transition-colors"
-                  aria-label="Facebook"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
-                  </svg>
-                </a>
-                {/* X (Twitter) */}
-                <a
-                  href="#"
-                  className="w-10 h-10 flex items-center justify-center rounded-full border border-[#174676] hover:bg-[#174676] transition-colors"
-                  aria-label="X (Twitter)"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
-                  </svg>
-                </a>
-                {/* TikTok */}
-                <a
-                  href="#"
-                  className="w-10 h-10 flex items-center justify-center rounded-full border border-[#174676] hover:bg-[#174676] transition-colors"
-                  aria-label="TikTok"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                  </svg>
-                </a>
-                {/* YouTube */}
-                <a
-                  href="#"
-                  className="w-10 h-10 flex items-center justify-center rounded-full border border-[#174676] hover:bg-[#174676] transition-colors"
-                  aria-label="YouTube"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M23.498 6.186a3 3 0 00-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3 3 0 00-2.122 2.136C0 8.055 0 12 0 12s0 3.945.501 5.814a3 3 0 002.122 2.136c1.871.55 9.377.55 9.377.55s7.505 0 9.377-.55a3 3 0 002.122-2.136C24 15.945 24 12 24 12s0-3.945-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </div>
+          </aside>
         </div>
-      </div>
+      </section>
     </main>
   );
 }
