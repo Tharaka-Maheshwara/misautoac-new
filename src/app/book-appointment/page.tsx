@@ -15,6 +15,124 @@ import {
   doc,
 } from "firebase/firestore";
 
+type VehicleIllustrationProps = {
+  type: string;
+  selected: boolean;
+};
+
+function VehicleIllustration({ type, selected }: VehicleIllustrationProps) {
+  const gradientId = `vehicle-${type.toLowerCase().replace(/\s+/g, "-")}`;
+  const colors: Record<string, [string, string]> = {
+    Car: ["#2563eb", "#1d4ed8"],
+    SUV: ["#0f766e", "#115e59"],
+    Truck: ["#ea580c", "#c2410c"],
+    Van: ["#7c3aed", "#5b21b6"],
+    "Sports Car": ["#dc2626", "#991b1b"],
+    Luxury: ["#111827", "#334155"],
+    Electric: ["#0891b2", "#0369a1"],
+    Hybrid: ["#16a34a", "#15803d"],
+    Other: ["#64748b", "#475569"],
+  };
+  const [startColor, endColor] = colors[type] ?? colors.Other;
+
+  const bodyPaths: Record<string, string> = {
+    Car: "M20 68 31 51c4-7 11-11 20-12h82c12 0 21 5 28 15l28 5c8 1 13 6 13 13v7H18v-7c0-2 1-3 2-4Z",
+    SUV: "M18 67 29 42c3-7 9-10 17-10h105c8 0 14 4 18 11l13 17 12 3c6 2 9 6 9 12v5H17v-8c0-2 0-3 1-5Z",
+    Truck:
+      "M18 69V45h93v15h19l10-17h31l17 20 8 2c5 2 7 5 7 10v5H17v-7c0-2 0-3 1-4Z",
+    Van: "M20 68V30c0-5 4-9 9-9h120c9 0 15 4 20 11l19 27 7 5c4 3 6 6 6 11v5H18v-8c0-2 1-3 2-4Z",
+    "Sports Car":
+      "M18 70 31 59l40-8 27-14h42l26 18 24 5c8 2 12 6 12 13v6H17v-6l1-3Z",
+    Luxury:
+      "M18 68 32 49c5-7 12-10 21-11h79c12 0 22 5 30 17l26 5c9 2 14 6 14 13v7H17v-8l1-4Z",
+    Electric:
+      "M20 68 31 51c4-7 11-11 20-12h82c12 0 21 5 28 15l28 5c8 1 13 6 13 13v7H18v-7c0-2 1-3 2-4Z",
+    Hybrid:
+      "M20 68 31 51c4-7 11-11 20-12h82c12 0 21 5 28 15l28 5c8 1 13 6 13 13v7H18v-7c0-2 1-3 2-4Z",
+    Other:
+      "M20 68 31 51c4-7 11-11 20-12h82c12 0 21 5 28 15l28 5c8 1 13 6 13 13v7H18v-7c0-2 1-3 2-4Z",
+  };
+
+  const windowPaths: Record<string, string> = {
+    SUV: "M43 39h48v19H36l7-19Zm55 0h49c6 0 11 3 14 8l8 11H98V39Z",
+    Truck: "M142 49h26l11 13h-42l5-13Z",
+    Van: "M34 29h56v29H30V34c0-3 1-5 4-5Zm64 0h49c7 0 11 3 15 9l13 20H98V29Z",
+    "Sports Car": "M77 52 101 42h36l17 13-77-3Z",
+    default:
+      "M48 46c3-3 7-4 12-4h35v16H39l9-12Zm54-4h28c9 0 16 4 22 13l2 3h-52V42Z",
+  };
+
+  const rearWheelX = type === "Truck" ? 54 : 55;
+  const frontWheelX = type === "Truck" ? 174 : 166;
+
+  return (
+    <svg
+      viewBox="0 0 220 105"
+      className="h-full w-full"
+      role="img"
+      aria-label={`${type} vector illustration`}
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor={startColor} />
+          <stop offset="1" stopColor={endColor} />
+        </linearGradient>
+        <linearGradient id={`${gradientId}-glass`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#dbeafe" />
+          <stop offset="1" stopColor="#64748b" />
+        </linearGradient>
+      </defs>
+
+      <ellipse cx="110" cy="91" rx="88" ry="7" fill="#0f172a" opacity="0.14" />
+      <path
+        d={bodyPaths[type] ?? bodyPaths.Other}
+        fill={`url(#${gradientId})`}
+        stroke={selected ? "#ffffff" : "#1e293b"}
+        strokeWidth="1.5"
+      />
+      <path
+        d={windowPaths[type] ?? windowPaths.default}
+        fill={`url(#${gradientId}-glass)`}
+        stroke="#e2e8f0"
+        strokeWidth="1"
+      />
+      <path d="M23 68h176" stroke="#ffffff" strokeOpacity="0.32" />
+      <rect x="22" y="67" width="8" height="5" rx="2" fill="#fef08a" />
+      <rect x="191" y="67" width="8" height="5" rx="2" fill="#fecaca" />
+
+      {[rearWheelX, frontWheelX].map((wheelX) => (
+        <g key={wheelX}>
+          <circle cx={wheelX} cy="79" r="13" fill="#0f172a" />
+          <circle cx={wheelX} cy="79" r="7" fill="#94a3b8" />
+          <circle cx={wheelX} cy="79" r="3" fill="#e2e8f0" />
+        </g>
+      ))}
+
+      {type === "Electric" && (
+        <path d="m112 48-9 14h7l-2 11 12-17h-8l3-8h-3Z" fill="#fef08a" />
+      )}
+      {type === "Hybrid" && (
+        <path
+          d="M105 67c13 0 22-7 24-18-12 0-22 5-24 18Zm0 0c-1-8-6-13-14-15 0 8 4 14 14 15Z"
+          fill="#bbf7d0"
+        />
+      )}
+      {type === "Other" && (
+        <text
+          x="110"
+          y="67"
+          textAnchor="middle"
+          fill="#fff"
+          fontSize="22"
+          fontWeight="800"
+        >
+          ?
+        </text>
+      )}
+    </svg>
+  );
+}
+
 export default function BookAppointmentPage() {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const activeStep = Number(currentStep);
@@ -342,7 +460,7 @@ export default function BookAppointmentPage() {
       id: "Van",
       code: "VAN",
       description: "Passenger & cargo",
-      path: "M4 5h12l4 5v7H4V5Zm3 3h7m3 2h3M7 17v2m10-2v2",
+      path: "M4 5h12l4 5v12H4V5Zm3 3h7m3 2h3M7 17v2m10-2v2",
     },
     {
       id: "Sports Car",
@@ -434,6 +552,14 @@ export default function BookAppointmentPage() {
       icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
     },
   ];
+
+  const bookingSteps = [
+    { number: 1, title: "Service", subtitle: "Choose services" },
+    { number: 2, title: "Vehicle", subtitle: "Vehicle & schedule" },
+    { number: 3, title: "Details", subtitle: "Contact information" },
+    { number: 4, title: "Review", subtitle: "Confirm booking" },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header Section */}
@@ -487,134 +613,81 @@ export default function BookAppointmentPage() {
       >
         <div className="max-w-7xl mx-auto mt-0 relative z-20">
           {/* Stepper */}
-          <div className="flex items-center justify-center mb-12 flex-nowrap px-4 overflow-x-auto overflow-y-hidden pb-4">
-            <div
-              className={`flex flex-col items-center ${currentStep < 1 ? "opacity-50" : ""}`}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep >= 1 ? "bg-blue-600 text-white shadow-md ring-4 ring-blue-100" : "bg-white border-2 border-gray-300 text-gray-500"}`}
-              >
-                {currentStep > 1 ? (
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                ) : (
-                  "1"
-                )}
-              </div>
-              <p
-                className={`mt-3 text-sm font-bold ${currentStep >= 1 ? "text-gray-800" : "text-gray-600"}`}
-              >
-                Service
-              </p>
-              <p className="text-xs text-gray-500 whitespace-nowrap">
-                Select service type
-              </p>
-            </div>
-            <div
-              className={`w-16 md:w-32 h-[1px] mx-2 -mt-8 ${currentStep >= 2 ? "bg-blue-600" : "bg-gray-300"}`}
-            ></div>
+          <div className="mb-12 overflow-x-auto pb-4">
+            <div className="mx-auto flex min-w-[650px] max-w-4xl items-start rounded-3xl border border-slate-200/80 bg-white px-7 py-6 shadow-[0_18px_45px_-30px_rgba(15,23,42,0.5),inset_0_1px_0_white] sm:px-10">
+              {bookingSteps.map((step, index) => {
+                const isCompleted = currentStep > step.number;
+                const isActive = currentStep === step.number;
 
-            <div
-              className={`flex flex-col items-center ${currentStep < 2 ? "opacity-50" : ""}`}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep >= 2 ? "bg-blue-600 text-white shadow-md ring-4 ring-blue-100" : "bg-white border-2 border-gray-300 text-gray-500"}`}
-              >
-                {currentStep > 2 ? (
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                ) : (
-                  "2"
-                )}
-              </div>
-              <p
-                className={`mt-3 text-sm font-semibold ${currentStep >= 2 ? "text-gray-800" : "text-gray-600"}`}
-              >
-                Vehicle
-              </p>
-              <p className="text-xs text-gray-500 whitespace-nowrap">
-                Your vehicle & schedule
-              </p>
-            </div>
-            <div
-              className={`w-16 md:w-32 h-[1px] mx-2 -mt-8 ${currentStep >= 3 ? "bg-blue-600" : "bg-gray-300"}`}
-            ></div>
+                return (
+                  <React.Fragment key={step.number}>
+                    <div className="relative flex w-28 shrink-0 flex-col items-center text-center sm:w-36">
+                      <div
+                        className={`relative z-10 flex h-12 w-12 items-center justify-center rounded-2xl text-sm font-extrabold transition-all duration-300 ${
+                          isCompleted
+                            ? "bg-emerald-500 text-white shadow-[0_10px_22px_-8px_rgba(16,185,129,0.75)] ring-4 ring-emerald-100"
+                            : isActive
+                              ? "scale-110 bg-linear-to-br from-blue-500 to-blue-700 text-white shadow-[0_12px_26px_-8px_rgba(37,99,235,0.85)] ring-4 ring-blue-100"
+                              : "border border-slate-200 bg-slate-50 text-slate-400 shadow-sm"
+                        }`}
+                      >
+                        {isCompleted ? (
+                          <svg
+                            className="h-6 w-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={3}
+                              d="m5 12 4 4L19 7"
+                            />
+                          </svg>
+                        ) : (
+                          step.number
+                        )}
+                      </div>
 
-            <div
-              className={`flex flex-col items-center ${currentStep < 3 ? "opacity-50" : ""}`}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep >= 3 ? "bg-blue-600 text-white shadow-md ring-4 ring-blue-100" : "bg-white border-2 border-gray-300 text-gray-500"}`}
-              >
-                {currentStep > 3 ? (
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                ) : (
-                  "3"
-                )}
-              </div>
-              <p
-                className={`mt-3 text-sm font-semibold ${currentStep >= 3 ? "text-gray-800" : "text-gray-600"}`}
-              >
-                Details
-              </p>
-              <p className="text-xs text-gray-500 whitespace-nowrap">
-                Personal information
-              </p>
-            </div>
-            <div
-              className={`w-16 md:w-32 h-[1px] mx-2 -mt-8 ${currentStep >= 4 ? "bg-blue-600" : "bg-gray-300"}`}
-            ></div>
+                      <p
+                        className={`mt-4 text-sm font-extrabold ${
+                          isCompleted
+                            ? "text-emerald-700"
+                            : isActive
+                              ? "text-blue-700"
+                              : "text-slate-400"
+                        }`}
+                      >
+                        {step.title}
+                      </p>
+                      <p
+                        className={`mt-1 whitespace-nowrap text-[11px] ${isActive || isCompleted ? "text-slate-500" : "text-slate-400"}`}
+                      >
+                        {step.subtitle}
+                      </p>
 
-            <div
-              className={`flex flex-col items-center ${currentStep < 4 ? "opacity-50" : ""}`}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep >= 4 ? "bg-blue-600 text-white shadow-md ring-4 ring-blue-100" : "bg-white border-2 border-gray-300 text-gray-500"}`}
-              >
-                4
-              </div>
-              <p
-                className={`mt-3 text-sm font-semibold ${currentStep >= 4 ? "text-gray-800" : "text-gray-600"}`}
-              >
-                Review
-              </p>
-              <p className="text-xs text-gray-500 whitespace-nowrap">
-                Confirm your booking
-              </p>
+                      {isActive && (
+                        <span className="mt-3 rounded-full bg-blue-50 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-blue-600">
+                          Current step
+                        </span>
+                      )}
+                    </div>
+
+                    {index < bookingSteps.length - 1 && (
+                      <div className="relative mt-6 h-1 flex-1 overflow-hidden rounded-full bg-slate-200">
+                        <div
+                          className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${
+                            currentStep > step.number
+                              ? "w-full bg-linear-to-r from-emerald-400 to-blue-500"
+                              : "w-0 bg-blue-500"
+                          }`}
+                        />
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </div>
           </div>
 
@@ -842,41 +915,33 @@ export default function BookAppointmentPage() {
                               setErrors((p) => ({ ...p, vehicle: undefined }));
                             }}
                             aria-pressed={selectedVehicleType === t.id}
-                            className={`group relative min-h-28 overflow-hidden rounded-2xl border p-3.5 text-left outline-none transition-all duration-300 focus-visible:ring-4 focus-visible:ring-blue-500/20 sm:min-h-32 sm:p-4 ${
+                            className={`group relative min-h-36 overflow-hidden rounded-2xl border p-3 text-left outline-none transition-all duration-300 focus-visible:ring-4 focus-visible:ring-blue-500/20 sm:min-h-40 ${
                               selectedVehicleType === t.id
                                 ? "-translate-y-1 border-blue-500 bg-linear-to-br from-blue-50 via-white to-blue-100/80 shadow-[0_16px_30px_-14px_rgba(37,99,235,0.55),inset_0_1px_0_white] ring-1 ring-blue-500/10"
                                 : "border-slate-200 bg-linear-to-br from-white to-slate-50 shadow-[0_8px_18px_-16px_rgba(15,23,42,0.65),inset_0_1px_0_white] hover:-translate-y-1 hover:border-blue-300 hover:shadow-[0_16px_28px_-16px_rgba(37,99,235,0.38),inset_0_1px_0_white]"
                             }`}
                           >
                             <span
-                              className={`mb-3 flex h-14 w-full items-center justify-between rounded-xl px-3 shadow-sm transition-transform duration-300 group-hover:scale-[1.02] ${
+                              className={`relative mb-3 flex h-20 w-full items-center justify-center overflow-hidden rounded-xl border shadow-sm transition-all sm:h-24 ${
                                 selectedVehicleType === t.id
-                                  ? "bg-blue-600 text-white ring-4 ring-blue-100"
-                                  : "border border-slate-200 bg-white text-slate-500"
+                                  ? "border-blue-500 bg-linear-to-br from-blue-500 to-blue-700 text-white"
+                                  : "border-slate-200 bg-linear-to-br from-white to-slate-100 text-slate-600"
                               }`}
                             >
-                              <svg
-                                className="h-9 w-14 shrink-0"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                aria-hidden="true"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={1.7}
-                                  d={t.path}
+                              <span className="h-full w-full transition-transform duration-300 group-hover:scale-105">
+                                <VehicleIllustration
+                                  type={t.id}
+                                  selected={selectedVehicleType === t.id}
                                 />
-                              </svg>
-                              <span className="rounded-md bg-current/10 px-2 py-1 text-[9px] font-black tracking-wider sm:text-[10px]">
+                              </span>
+                              <span className="absolute right-2 bottom-2 rounded-md bg-white/90 px-2 py-1 text-[9px] font-black tracking-wider text-slate-700 shadow-sm sm:text-[10px]">
                                 {t.code}
                               </span>
                             </span>
-                            <span className="block text-xs font-bold text-slate-900 sm:text-sm">
+                            <span className="block px-1 text-xs font-bold text-slate-900 sm:text-sm">
                               {t.id}
                             </span>
-                            <span className="mt-1 hidden text-[10px] leading-4 text-slate-500 sm:block">
+                            <span className="mt-1 hidden px-1 text-[10px] leading-4 text-slate-500 sm:block">
                               {t.description}
                             </span>
 
@@ -2172,14 +2237,18 @@ export default function BookAppointmentPage() {
 
       {/* Confirmation Modal */}
       {showConfirmation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm">
-          <div className="relative max-h-[92vh] w-full max-w-md overflow-y-auto rounded-3xl border border-white/80 bg-white p-6 shadow-[0_35px_90px_-25px_rgba(2,6,23,0.7)] sm:p-8">
-            {/* Top Blue Line */}
-            <div className="absolute top-0 right-0 left-0 h-1.5 rounded-t-3xl bg-linear-to-r from-blue-400 via-blue-600 to-slate-900"></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-3 backdrop-blur-md sm:p-6">
+          <div className="relative max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-[32px] border border-white/15 bg-white shadow-[0_40px_110px_-28px_rgba(2,6,23,0.85)]">
+            <div className="relative overflow-hidden bg-linear-to-br from-[#0f172a] via-[#172554] to-blue-700 px-6 pt-8 pb-16 text-center text-white sm:px-10 sm:pt-10">
+              <div className="absolute -top-24 -right-20 h-64 w-64 rounded-full bg-blue-400/20 blur-3xl" />
+              <div className="absolute -bottom-28 -left-20 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl" />
+              <div className="relative mb-5 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-blue-200">
+                <span className="h-px w-8 bg-blue-300/50" />
+                Mist Auto A/C
+                <span className="h-px w-8 bg-blue-300/50" />
+              </div>
 
-            {/* Success Icon */}
-            <div className="mb-6 flex justify-center pt-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-linear-to-br from-emerald-400 to-emerald-600 text-white shadow-[0_16px_34px_-12px_rgba(5,150,105,0.7)] ring-8 ring-emerald-50">
+              <div className="relative mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-400 text-white shadow-[0_18px_42px_-12px_rgba(52,211,153,0.85)] ring-8 ring-white/10">
                 <svg
                   className="h-10 w-10"
                   fill="none"
@@ -2194,224 +2263,227 @@ export default function BookAppointmentPage() {
                   />
                 </svg>
               </div>
+
+              <p className="relative mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">
+                Appointment secured
+              </p>
+              <h2 className="relative mb-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
+                Booking Confirmed
+              </h2>
+              <p className="relative text-sm leading-6 text-blue-100">
+                Your service appointment is successfully scheduled.
+              </p>
             </div>
 
-            {/* Heading */}
-            <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-600">
-              Appointment secured
-            </p>
-            <h2 className="mb-2 text-center text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-              Booking Confirmed!
-            </h2>
-            <p className="text-center text-sm text-gray-600 mb-6">
-              Your appointment has been scheduled successfully.
-            </p>
-
-            {/* Booking Details Box */}
-            <div className="mb-6 rounded-2xl border border-blue-200 bg-linear-to-br from-blue-50 to-white p-5 shadow-[inset_0_1px_0_white]">
-              <div className="mb-4 flex items-center justify-between gap-3 border-b border-blue-100 pb-4">
-                <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
-                  Booking Reference
-                </span>
-                <span className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-extrabold tracking-wide text-white shadow-md">
-                  {bookingRef}
-                </span>
+            <div className="relative -mt-8 px-5 pb-6 sm:px-8 sm:pb-8">
+              {/* Booking Details Box */}
+              <div className="mb-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_20px_48px_-26px_rgba(15,23,42,0.55)] sm:p-6">
+                <div className="mb-5 rounded-2xl bg-linear-to-r from-blue-50 to-indigo-50 p-4 text-center ring-1 ring-blue-100">
+                  <span className="block text-[10px] font-black uppercase tracking-[0.2em] text-blue-600">
+                    Booking Reference
+                  </span>
+                  <span className="mt-2 block text-2xl font-black tracking-[0.08em] text-blue-700 sm:text-3xl">
+                    {bookingRef}
+                  </span>
+                </div>
+                <div className="grid gap-3 text-sm sm:grid-cols-2">
+                  <div className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/80 p-3 sm:col-span-2">
+                    <svg
+                      className="w-4 h-4 text-blue-600 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 font-medium">
+                      {services
+                        .filter((s) => selectedServices.includes(s.id))
+                        .map((s) => s.title)
+                        .join(", ")}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+                    <svg
+                      className="w-4 h-4 text-blue-600 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                      />
+                    </svg>
+                    <span className="text-gray-700 font-medium">
+                      {selectedVehicleType}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+                    <svg
+                      className="w-4 h-4 text-blue-600 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 font-medium">
+                      {selectedDate
+                        ? `${selectedDate.toLocaleString("default", { month: "long" })} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`
+                        : "Not selected"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+                    <svg
+                      className="w-4 h-4 text-blue-600 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 font-medium">
+                      {selectedTime}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+                    <svg
+                      className="w-4 h-4 text-blue-600 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    <span className="text-gray-700 font-medium">
+                      {fullName}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-3">
-                  <svg
-                    className="w-4 h-4 text-blue-600 shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                    />
-                  </svg>
-                  <span className="text-gray-700 font-medium">
-                    {services
-                      .filter((s) => selectedServices.includes(s.id))
-                      .map((s) => s.title)
-                      .join(", ")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <svg
-                    className="w-4 h-4 text-blue-600 shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                    />
-                  </svg>
-                  <span className="text-gray-700 font-medium">
-                    {selectedVehicleType}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <svg
-                    className="w-4 h-4 text-blue-600 shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <span className="text-gray-700 font-medium">
-                    {selectedDate
-                      ? `${selectedDate.toLocaleString("default", { month: "long" })} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`
-                      : "Not selected"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <svg
-                    className="w-4 h-4 text-blue-600 shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span className="text-gray-700 font-medium">
-                    {selectedTime}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <svg
-                    className="w-4 h-4 text-blue-600 shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                  <span className="text-gray-700 font-medium">{fullName}</span>
-                </div>
+
+              {/* Email Confirmation Message */}
+              <div
+                className={`mb-6 rounded-2xl border p-4 shadow-sm ${
+                  emailStatus === "sent"
+                    ? "border-green-200 bg-green-50"
+                    : "border-amber-200 bg-amber-50"
+                }`}
+              >
+                {emailStatus === "sent" ? (
+                  <p className="text-xs leading-relaxed text-green-800">
+                    <span className="font-semibold">
+                      A confirmation email has been sent to{" "}
+                    </span>
+                    <span className="font-bold">{emailAddress}</span>.
+                  </p>
+                ) : (
+                  <p className="text-xs leading-relaxed text-amber-800">
+                    <span className="font-semibold">
+                      Your appointment was saved successfully,
+                    </span>{" "}
+                    but the confirmation email could not be sent. Please keep
+                    your booking reference: {bookingRef}.
+                  </p>
+                )}
               </div>
-            </div>
 
-            {/* Email Confirmation Message */}
-            <div
-              className={`mb-6 rounded-2xl border p-4 shadow-sm ${
-                emailStatus === "sent"
-                  ? "border-green-200 bg-green-50"
-                  : "border-amber-200 bg-amber-50"
-              }`}
-            >
-              {emailStatus === "sent" ? (
-                <p className="text-xs leading-relaxed text-green-800">
-                  <span className="font-semibold">
-                    A confirmation email has been sent to{" "}
-                  </span>
-                  <span className="font-bold">{emailAddress}</span>.
-                </p>
-              ) : (
-                <p className="text-xs leading-relaxed text-amber-800">
-                  <span className="font-semibold">
-                    Your appointment was saved successfully,
-                  </span>{" "}
-                  but the confirmation email could not be sent. Please keep your
-                  booking reference: {bookingRef}.
-                </p>
-              )}
-            </div>
-
-            {/* Action Buttons: primary + clear Close (side-by-side for clarity) */}
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <button
-                onClick={() => {
-                  setShowConfirmation(false);
-                  setCurrentStep(1);
-                  setSelectedServices([]);
-                  setSelectedVehicleType(null);
-                  setMakeModel("");
-                  setYear("");
-                  setFullName("");
-                  setEmailAddress("");
-                  setPhoneNumber("");
-                  setAdditionalNotes("");
-                  setSelectedDate(null);
-                  setSelectedTime(null);
-                  setBookingRef("");
-                  setEmailStatus("idle");
-                }}
-                className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-blue-700 px-5 py-3 text-sm font-bold text-white shadow-[0_14px_26px_-11px_rgba(37,99,235,0.85)] transition-all hover:-translate-y-0.5 hover:from-blue-700 hover:to-blue-800"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              {/* Action Buttons: primary + clear Close (side-by-side for clarity) */}
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <button
+                  onClick={() => {
+                    setShowConfirmation(false);
+                    setCurrentStep(1);
+                    setSelectedServices([]);
+                    setSelectedVehicleType(null);
+                    setMakeModel("");
+                    setYear("");
+                    setFullName("");
+                    setEmailAddress("");
+                    setPhoneNumber("");
+                    setAdditionalNotes("");
+                    setSelectedDate(null);
+                    setSelectedTime(null);
+                    setBookingRef("");
+                    setEmailStatus("idle");
+                  }}
+                  className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-blue-700 px-5 py-3 text-sm font-bold text-white shadow-[0_14px_26px_-11px_rgba(37,99,235,0.85)] transition-all hover:-translate-y-0.5 hover:from-blue-700 hover:to-blue-800"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 5v14m7-7H5"
-                  />
-                </svg>
-                Book Another Appointment
-              </button>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 5v14m7-7H5"
+                    />
+                  </svg>
+                  Book Another Appointment
+                </button>
 
-              <button
-                onClick={() => {
-                  setShowConfirmation(false);
-                  setCurrentStep(1);
-                  setSelectedServices([]);
-                  setSelectedVehicleType(null);
-                  setMakeModel("");
-                  setYear("");
-                  setFullName("");
-                  setEmailAddress("");
-                  setPhoneNumber("");
-                  setAdditionalNotes("");
-                  setSelectedDate(null);
-                  setSelectedTime(null);
-                  setBookingRef("");
-                  setEmailStatus("idle");
-                }}
-                className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:text-blue-700 hover:shadow-md"
-                aria-label="Close and reset form"
-              >
-                <svg
-                  className="w-4 h-4 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <button
+                  onClick={() => {
+                    setShowConfirmation(false);
+                    setCurrentStep(1);
+                    setSelectedServices([]);
+                    setSelectedVehicleType(null);
+                    setMakeModel("");
+                    setYear("");
+                    setFullName("");
+                    setEmailAddress("");
+                    setPhoneNumber("");
+                    setAdditionalNotes("");
+                    setSelectedDate(null);
+                    setSelectedTime(null);
+                    setBookingRef("");
+                    setEmailStatus("idle");
+                  }}
+                  className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:text-blue-700 hover:shadow-md"
+                  aria-label="Close and reset form"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-                Close
-              </button>
+                  <svg
+                    className="w-4 h-4 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
