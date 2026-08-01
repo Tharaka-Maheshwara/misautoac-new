@@ -1,5 +1,7 @@
 "use client";
 
+// Professional appointment flow UI - updated service, vehicle, and summary sections.
+
 import React, { useState, useEffect } from "react";
 import emailjs from "@emailjs/browser";
 import { db } from "@/lib/firebase";
@@ -49,6 +51,17 @@ export default function BookAppointmentPage() {
     email?: string;
     phone?: string;
   }>({});
+
+  useEffect(() => {
+    const bookingFlow = document.getElementById("booking-flow");
+    if (!bookingFlow) return;
+
+    const timer = window.setTimeout(() => {
+      bookingFlow.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+
+    return () => window.clearTimeout(timer);
+  }, [currentStep]);
 
   // --- Fetch Booked Times ---
   useEffect(() => {
@@ -226,7 +239,7 @@ export default function BookAppointmentPage() {
             day: "numeric",
           }) ?? "Not specified",
         appointment_time: selectedTime ?? "Not specified",
-        services: serviceTitles.map((service) => `• ${service}`).join("\n"),
+        services: serviceTitles.map((service) => `- ${service}`).join("\n"),
         vehicle_type: selectedVehicleType ?? "Not specified",
         make_model: makeModel.trim() || "Not specified",
         vehicle_year: year.trim() || "Not specified",
@@ -307,15 +320,60 @@ export default function BookAppointmentPage() {
   };
 
   const vehicleTypes = [
-    { id: "Car", icon: "🚗", description: "Sedan & hatchback" },
-    { id: "SUV", icon: "🚙", description: "SUV & crossover" },
-    { id: "Truck", icon: "🛻", description: "Pickup & utility" },
-    { id: "Van", icon: "🚐", description: "Passenger & cargo" },
-    { id: "Sports Car", icon: "🏎️", description: "Performance vehicle" },
-    { id: "Luxury", icon: "🚘", description: "Premium vehicle" },
-    { id: "Electric", icon: "⚡", description: "Fully electric" },
-    { id: "Hybrid", icon: "🔋", description: "Hybrid powertrain" },
-    { id: "Other", icon: "✨", description: "Another vehicle type" },
+    {
+      id: "Car",
+      code: "CAR",
+      description: "Sedan & hatchback",
+      path: "M3 16v-3l2-5h14l2 5v3H3Zm3-3h12M6 16v2m12-2v2",
+    },
+    {
+      id: "SUV",
+      code: "SUV",
+      description: "SUV & crossover",
+      path: "M3 16V9l3-4h11l4 5v6H3Zm3-6h11M6 16v2m12-2v2",
+    },
+    {
+      id: "Truck",
+      code: "TRK",
+      description: "Pickup & utility",
+      path: "M3 7h11v9H3V7Zm11 4h4l3 3v2h-7v-5ZM6 16v2m12-2v2",
+    },
+    {
+      id: "Van",
+      code: "VAN",
+      description: "Passenger & cargo",
+      path: "M4 5h12l4 5v7H4V5Zm3 3h7m3 2h3M7 17v2m10-2v2",
+    },
+    {
+      id: "Sports Car",
+      code: "SPT",
+      description: "Performance vehicle",
+      path: "M2 16v-3l5-4h9l6 4v3H2Zm5-3h10M6 16v2m12-2v2",
+    },
+    {
+      id: "Luxury",
+      code: "LUX",
+      description: "Premium vehicle",
+      path: "M3 16v-3l3-6h12l3 6v3H3Zm4-4h10M7 16v2m10-2v2M10 7l2-2 2 2",
+    },
+    {
+      id: "Electric",
+      code: "EV",
+      description: "Fully electric",
+      path: "M13 2 6 13h5l-1 9 8-12h-5V2Z",
+    },
+    {
+      id: "Hybrid",
+      code: "HYB",
+      description: "Hybrid powertrain",
+      path: "M7 4h10v16H7V4Zm3-2h4m-3 6-2 4h3l-1 4 4-6h-3l1-2",
+    },
+    {
+      id: "Other",
+      code: "OTH",
+      description: "Another vehicle type",
+      path: "M12 3v18M3 12h18M5.5 5.5l13 13m0-13-13 13",
+    },
   ];
 
   const services = [
@@ -323,7 +381,7 @@ export default function BookAppointmentPage() {
       id: 1,
       title: "AC Repair & Maintenance",
       desc: "Full inspection & repair of all AC components",
-      time: "1–2 hrs",
+      time: "1-2 hrs",
       icon: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z",
     },
     {
@@ -344,14 +402,14 @@ export default function BookAppointmentPage() {
       id: 4,
       title: "Compressor Replacement",
       desc: "OEM-grade compressor swap with warranty",
-      time: "2–3 hrs",
+      time: "2-3 hrs",
       icon: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
     },
     {
       id: 5,
       title: "Electrical System Repair",
       desc: "Wiring, relays & control module diagnostics",
-      time: "1–2 hrs",
+      time: "1-2 hrs",
       icon: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
     },
     {
@@ -372,7 +430,7 @@ export default function BookAppointmentPage() {
       id: 8,
       title: "Complete System Installation",
       desc: "Brand-new AC unit install from scratch",
-      time: "3–4 hrs",
+      time: "3-4 hrs",
       icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
     },
   ];
@@ -417,13 +475,16 @@ export default function BookAppointmentPage() {
           {/* Subheading */}
           <p className="text-lg md:text-xl text-gray-100 max-w-2xl mb-12 leading-relaxed drop-shadow">
             Schedule a certified auto AC service in minutes. Choose your
-            service, pick a slot, and we'll handle the rest — guaranteed.
+            service, pick a slot, and we'll handle the rest - guaranteed.
           </p>
         </div>
       </section>
 
       {/* Interactive Booking Section */}
-      <section className="flex-1 bg-gray-50 py-12 px-4 md:px-12 relative z-10">
+      <section
+        id="booking-flow"
+        className="relative z-10 scroll-mt-20 flex-1 bg-gray-50 px-4 py-12 md:px-12"
+      >
         <div className="max-w-7xl mx-auto mt-0 relative z-20">
           {/* Stepper */}
           <div className="flex items-center justify-center mb-12 flex-nowrap px-4 overflow-x-auto overflow-y-hidden pb-4">
@@ -561,9 +622,10 @@ export default function BookAppointmentPage() {
             {/* Left Container */}
             <div className="w-full lg:w-2/3 flex flex-col gap-6">
               {currentStep === 1 && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_24px_55px_-30px_rgba(15,23,42,0.5),0_3px_8px_rgba(15,23,42,0.08)] sm:p-7 md:p-8">
+                  <div className="pointer-events-none absolute -top-24 -right-20 h-64 w-64 rounded-full bg-blue-100/70 blur-3xl" />
+                  <div className="relative mb-8 flex items-center gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-blue-500 to-blue-700 text-white shadow-[0_12px_24px_-9px_rgba(37,99,235,0.8),inset_0_1px_0_rgba(255,255,255,0.35)]">
                       <svg
                         className="w-6 h-6"
                         fill="none"
@@ -585,33 +647,38 @@ export default function BookAppointmentPage() {
                       </svg>
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-900">
+                      <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
+                        Step 01 - Service selection
+                      </p>
+                      <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
                         Select a Service
                       </h2>
-                      <p className="text-gray-500">
-                        What would you like us to do? (You can select multiple)
+                      <p className="mt-1 text-sm leading-6 text-slate-500">
+                        Choose one or more services for your vehicle.
                       </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="relative grid grid-cols-1 gap-4 md:grid-cols-2">
                     {services.map((svc) => {
                       const isSelected = selectedServices.includes(svc.id);
                       return (
-                        <div
+                        <button
+                          type="button"
                           key={svc.id}
                           onClick={() => handleServiceSelection(svc.id)}
-                          className={`cursor-pointer border-2 rounded-xl p-4 flex gap-4 transition-all relative ${
+                          aria-pressed={isSelected}
+                          className={`group relative flex min-h-32 gap-4 overflow-hidden rounded-2xl border p-4 text-left outline-none transition-all duration-300 focus-visible:ring-4 focus-visible:ring-blue-500/20 sm:p-5 ${
                             isSelected
-                              ? "border-indigo-400 bg-indigo-50/50 shadow-sm"
-                              : "border-gray-200 hover:border-gray-300 bg-white"
+                              ? "-translate-y-1 border-blue-500 bg-linear-to-br from-blue-50 via-white to-blue-100/80 shadow-[0_18px_34px_-17px_rgba(37,99,235,0.65),inset_0_1px_0_white] ring-1 ring-blue-500/10"
+                              : "border-slate-200 bg-linear-to-br from-white to-slate-50 shadow-[0_8px_20px_-18px_rgba(15,23,42,0.7),inset_0_1px_0_white] hover:-translate-y-1 hover:border-blue-300 hover:shadow-[0_18px_32px_-18px_rgba(37,99,235,0.45),inset_0_1px_0_white]"
                           }`}
                         >
                           <div
-                            className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center mt-1 ${
+                            className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ${
                               isSelected
-                                ? "bg-indigo-100 text-indigo-600"
-                                : "bg-gray-100 text-gray-500"
+                                ? "bg-blue-600 text-white shadow-[0_8px_18px_-7px_rgba(37,99,235,0.8)] ring-4 ring-blue-100"
+                                : "border border-slate-200 bg-white text-slate-500 shadow-sm group-hover:border-blue-200 group-hover:text-blue-600"
                             }`}
                           >
                             <svg
@@ -630,14 +697,14 @@ export default function BookAppointmentPage() {
                           </div>
                           <div className="flex-1">
                             <h3
-                              className={`font-semibold ${isSelected ? "text-indigo-900" : "text-gray-900"}`}
+                              className={`pr-7 text-sm font-bold leading-5 sm:text-base ${isSelected ? "text-blue-950" : "text-slate-900"}`}
                             >
                               {svc.title}
                             </h3>
-                            <p className="text-xs text-gray-500 mt-1 mb-2 leading-relaxed">
+                            <p className="mt-1.5 mb-3 text-xs leading-5 text-slate-500">
                               {svc.desc}
                             </p>
-                            <div className="flex items-center text-xs text-gray-400 font-medium">
+                            <div className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-slate-500 shadow-sm">
                               <svg
                                 className="w-3.5 h-3.5 mr-1"
                                 fill="none"
@@ -655,7 +722,7 @@ export default function BookAppointmentPage() {
                             </div>
                           </div>
                           {isSelected && (
-                            <div className="absolute right-4 top-4 text-indigo-500 bg-white rounded-full">
+                            <div className="absolute top-3 right-3 rounded-full bg-blue-600 p-0.5 text-white shadow-md ring-4 ring-blue-100">
                               <svg
                                 className="w-5 h-5"
                                 fill="currentColor"
@@ -669,7 +736,7 @@ export default function BookAppointmentPage() {
                               </svg>
                             </div>
                           )}
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
@@ -691,7 +758,12 @@ export default function BookAppointmentPage() {
                     </div>
                   )}
 
-                  <div className="mt-8 flex justify-end">
+                  <div className="relative mt-8 flex flex-col items-stretch justify-between gap-4 border-t border-slate-100 pt-6 sm:flex-row sm:items-center">
+                    <p className="text-xs font-medium text-slate-500">
+                      {selectedServices.length > 0
+                        ? `${selectedServices.length} service${selectedServices.length > 1 ? "s" : ""} selected`
+                        : "Select at least one service to continue"}
+                    </p>
                     <button
                       onClick={() => {
                         if (selectedServices.length === 0) {
@@ -705,11 +777,11 @@ export default function BookAppointmentPage() {
                         setErrors((p) => ({ ...p, service: undefined }));
                         setCurrentStep(2);
                       }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-full shadow-md flex items-center gap-2 transition-all"
+                      className="group inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-blue-700 px-7 py-3.5 text-sm font-bold text-white shadow-[0_14px_28px_-11px_rgba(37,99,235,0.85),inset_0_1px_0_rgba(255,255,255,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-500/20"
                     >
                       Continue
                       <svg
-                        className="w-5 h-5"
+                        className="h-5 w-5 transition-transform group-hover:translate-x-1"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -749,7 +821,7 @@ export default function BookAppointmentPage() {
                         </div>
                         <div>
                           <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
-                            Step 02 · Vehicle details
+                            Step 02 - Vehicle details
                           </p>
                           <h2 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
                             Your Vehicle
@@ -777,13 +849,29 @@ export default function BookAppointmentPage() {
                             }`}
                           >
                             <span
-                              className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-xl shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-11 sm:w-11 sm:text-2xl ${
+                              className={`mb-3 flex h-14 w-full items-center justify-between rounded-xl px-3 shadow-sm transition-transform duration-300 group-hover:scale-[1.02] ${
                                 selectedVehicleType === t.id
-                                  ? "bg-blue-600 ring-4 ring-blue-100"
-                                  : "border border-slate-200 bg-white"
+                                  ? "bg-blue-600 text-white ring-4 ring-blue-100"
+                                  : "border border-slate-200 bg-white text-slate-500"
                               }`}
                             >
-                              {t.icon}
+                              <svg
+                                className="h-9 w-14 shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={1.7}
+                                  d={t.path}
+                                />
+                              </svg>
+                              <span className="rounded-md bg-current/10 px-2 py-1 text-[9px] font-black tracking-wider sm:text-[10px]">
+                                {t.code}
+                              </span>
                             </span>
                             <span className="block text-xs font-bold text-slate-900 sm:text-sm">
                               {t.id}
@@ -880,9 +968,10 @@ export default function BookAppointmentPage() {
                       </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col">
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                    <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_24px_55px_-30px_rgba(15,23,42,0.5),0_3px_8px_rgba(15,23,42,0.08)] sm:p-7 md:p-8">
+                      <div className="pointer-events-none absolute -top-24 -right-20 h-56 w-56 rounded-full bg-blue-100/70 blur-3xl" />
+                      <div className="relative mb-7 flex items-center gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-blue-500 to-blue-700 text-white shadow-[0_12px_24px_-9px_rgba(37,99,235,0.8),inset_0_1px_0_rgba(255,255,255,0.35)]">
                           <svg
                             className="w-5 h-5"
                             fill="none"
@@ -898,25 +987,28 @@ export default function BookAppointmentPage() {
                           </svg>
                         </div>
                         <div>
-                          <h2 className="text-xl font-bold text-gray-900">
+                          <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
+                            Schedule your visit
+                          </p>
+                          <h2 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
                             Pick a Date & Time
                           </h2>
-                          <p className="text-sm text-gray-500">
+                          <p className="mt-1 text-sm text-slate-500">
                             Choose your preferred appointment slot
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex flex-col md:flex-row gap-6">
-                        <div className="w-full md:w-1/2">
+                      <div className="relative grid gap-6 md:grid-cols-2">
+                        <div className="w-full">
                           <p className="text-sm font-bold text-gray-800 mb-3">
                             Preferred Date *
                           </p>
-                          <div className="border border-gray-200 rounded-xl p-4 bg-white">
+                          <div className="rounded-2xl border border-slate-200 bg-linear-to-br from-white to-slate-50 p-4 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.65),inset_0_1px_0_white] sm:p-5">
                             <div className="flex justify-between items-center mb-4">
                               <button
                                 onClick={handlePrevMonth}
-                                className="p-1 hover:bg-gray-100 rounded text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
                                 disabled={
                                   viewDate.getFullYear() ===
                                     today.getFullYear() &&
@@ -945,7 +1037,7 @@ export default function BookAppointmentPage() {
                               </span>
                               <button
                                 onClick={handleNextMonth}
-                                className="p-1 hover:bg-gray-100 rounded text-gray-600"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:text-blue-600"
                               >
                                 <svg
                                   className="w-4 h-4"
@@ -996,13 +1088,13 @@ export default function BookAppointmentPage() {
                                         }));
                                       }
                                     }}
-                                    className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm ${
+                                    className={`mx-auto flex h-9 w-9 items-center justify-center rounded-xl text-sm transition-all ${
                                       isPast
-                                        ? "text-gray-300 pointer-events-none"
-                                        : "cursor-pointer hover:bg-blue-50 text-gray-700"
+                                        ? "pointer-events-none text-slate-300"
+                                        : "cursor-pointer text-slate-700 hover:-translate-y-0.5 hover:bg-blue-50 hover:text-blue-700"
                                     } ${
                                       isSelected
-                                        ? "bg-blue-600 text-white font-bold shadow-md"
+                                        ? "bg-linear-to-br from-blue-500 to-blue-700 font-bold text-white shadow-[0_8px_16px_-6px_rgba(37,99,235,0.8)] ring-2 ring-blue-100"
                                         : ""
                                     }`}
                                   >
@@ -1019,11 +1111,11 @@ export default function BookAppointmentPage() {
                           )}
                         </div>
 
-                        <div className="w-full md:w-1/2">
+                        <div className="w-full">
                           <p className="text-sm font-bold text-gray-800 mb-3">
                             Available Times *
                           </p>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-2 gap-3">
                             {isLoadingTimes && (
                               <div className="col-span-2 text-center text-gray-500">
                                 Loading times...
@@ -1056,12 +1148,12 @@ export default function BookAppointmentPage() {
                                         }));
                                       }
                                     }}
-                                    className={`border rounded-lg p-2.5 text-center text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
+                                    className={`flex min-h-12 items-center justify-center gap-2 rounded-xl border px-3 py-3 text-center text-sm font-semibold outline-none transition-all duration-200 focus-visible:ring-4 focus-visible:ring-blue-500/20 ${
                                       selectedTime === time
-                                        ? "bg-blue-600 border-blue-600 text-white shadow-md"
+                                        ? "-translate-y-0.5 border-blue-600 bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.8)]"
                                         : isBooked
-                                          ? "bg-gray-200 border-gray-200 text-gray-400 cursor-not-allowed"
-                                          : "border-gray-200 bg-white hover:border-blue-300 text-gray-700"
+                                          ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400 line-through"
+                                          : "border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-blue-300 hover:text-blue-700 hover:shadow-md"
                                     }`}
                                   >
                                     <svg
@@ -1173,9 +1265,10 @@ export default function BookAppointmentPage() {
                 )}
 
                 {activeStep === 3 && (
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                  <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_24px_55px_-30px_rgba(15,23,42,0.5),0_3px_8px_rgba(15,23,42,0.08)] sm:p-7 md:p-8">
+                    <div className="pointer-events-none absolute -top-24 -right-20 h-56 w-56 rounded-full bg-blue-100/70 blur-3xl" />
+                    <div className="relative mb-7 flex items-center gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-blue-500 to-blue-700 text-white shadow-[0_12px_24px_-9px_rgba(37,99,235,0.8),inset_0_1px_0_rgba(255,255,255,0.35)]">
                         <svg
                           className="w-5 h-5"
                           fill="none"
@@ -1191,16 +1284,19 @@ export default function BookAppointmentPage() {
                         </svg>
                       </div>
                       <div>
-                        <h2 className="text-xl font-bold text-gray-900">
+                        <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
+                          Contact details
+                        </p>
+                        <h2 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
                           Personal Information
                         </h2>
-                        <p className="text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-slate-500">
                           We&apos;ll use this to confirm your booking
                         </p>
                       </div>
                     </div>
 
-                    <div className="space-y-5">
+                    <div className="relative space-y-5">
                       <div>
                         <label className="block text-sm font-semibold text-gray-900 mb-2">
                           Full Name <span className="text-red-500">*</span>
@@ -1229,7 +1325,7 @@ export default function BookAppointmentPage() {
                               setFullName(e.target.value);
                               setErrors((p) => ({ ...p, fullName: undefined }));
                             }}
-                            className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-3.5 pr-4 pl-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
                           />
                           {errors.fullName && (
                             <div className="mt-2 text-sm text-red-600">
@@ -1269,7 +1365,7 @@ export default function BookAppointmentPage() {
                                 setEmailAddress(e.target.value);
                                 setErrors((p) => ({ ...p, email: undefined }));
                               }}
-                              className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
+                              className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-3.5 pr-4 pl-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
                             />
                             {errors.email && (
                               <div className="mt-2 text-sm text-red-600">
@@ -1307,7 +1403,7 @@ export default function BookAppointmentPage() {
                                 setPhoneNumber(e.target.value);
                                 setErrors((p) => ({ ...p, phone: undefined }));
                               }}
-                              className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
+                              className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-3.5 pr-4 pl-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
                             />
                             {errors.phone && (
                               <div className="mt-2 text-sm text-red-600">
@@ -1346,13 +1442,13 @@ export default function BookAppointmentPage() {
                             value={additionalNotes}
                             onChange={(e) => setAdditionalNotes(e.target.value)}
                             rows={4}
-                            className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400 resize-none"
+                            className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50/80 py-3.5 pr-4 pl-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
                           />
                         </div>
                       </div>
                     </div>
 
-                    <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800 flex items-start gap-3">
+                    <div className="relative mt-6 flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/80 px-4 py-4 text-sm leading-6 text-blue-900 shadow-sm">
                       <svg
                         className="w-4 h-4 mt-0.5 shrink-0"
                         fill="none"
@@ -1372,10 +1468,10 @@ export default function BookAppointmentPage() {
                       </p>
                     </div>
 
-                    <div className="mt-8 flex justify-between items-center">
+                    <div className="relative mt-8 flex flex-col-reverse justify-between gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center">
                       <button
                         onClick={() => setCurrentStep(2)}
-                        className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-6 rounded-full transition-all flex items-center gap-2"
+                        className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md"
                       >
                         <svg
                           className="w-4 h-4"
@@ -1430,7 +1526,7 @@ export default function BookAppointmentPage() {
                           }));
                           setCurrentStep(4);
                         }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-full shadow-md flex items-center gap-2 transition-all"
+                        className="group flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-blue-700 px-8 py-3.5 text-sm font-bold text-white shadow-[0_14px_28px_-11px_rgba(37,99,235,0.85)] transition-all hover:-translate-y-0.5 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-500/20"
                       >
                         Review Booking
                         <svg
@@ -1452,9 +1548,10 @@ export default function BookAppointmentPage() {
                 )}
 
                 {activeStep === 4 && (
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                  <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_24px_55px_-30px_rgba(15,23,42,0.5),0_3px_8px_rgba(15,23,42,0.08)] sm:p-7 md:p-8">
+                    <div className="pointer-events-none absolute -top-24 -right-20 h-56 w-56 rounded-full bg-blue-100/70 blur-3xl" />
+                    <div className="relative mb-7 flex items-center gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-blue-500 to-blue-700 text-white shadow-[0_12px_24px_-9px_rgba(37,99,235,0.8),inset_0_1px_0_rgba(255,255,255,0.35)]">
                         <svg
                           className="w-5 h-5"
                           fill="none"
@@ -1470,18 +1567,21 @@ export default function BookAppointmentPage() {
                         </svg>
                       </div>
                       <div>
-                        <h2 className="text-xl font-bold text-gray-900">
+                        <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
+                          Final verification
+                        </p>
+                        <h2 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
                           Review Your Booking
                         </h2>
-                        <p className="text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-slate-500">
                           Please verify your details before confirming
                         </p>
                       </div>
                     </div>
 
-                    <div className="space-y-4 mb-8">
+                    <div className="relative mb-8 grid grid-cols-1 gap-4">
                       {/* Service Card */}
-                      <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 flex justify-between items-start">
+                      <div className="flex min-h-28 items-start justify-between rounded-2xl border border-slate-200 bg-linear-to-br from-white to-slate-50 p-4 shadow-[0_10px_22px_-19px_rgba(15,23,42,0.65),inset_0_1px_0_white] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
                         <div className="flex gap-4 flex-1">
                           <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-1">
                             <svg
@@ -1510,7 +1610,7 @@ export default function BookAppointmentPage() {
                                     )
                                     .map((s) => s.title)
                                     .join(", ")
-                                : "—"}
+                                : "Not selected"}
                             </p>
                           </div>
                         </div>
@@ -1523,7 +1623,7 @@ export default function BookAppointmentPage() {
                       </div>
 
                       {/* Vehicle Card */}
-                      <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 flex justify-between items-start">
+                      <div className="flex min-h-28 items-start justify-between rounded-2xl border border-slate-200 bg-linear-to-br from-white to-slate-50 p-4 shadow-[0_10px_22px_-19px_rgba(15,23,42,0.65),inset_0_1px_0_white] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
                         <div className="flex gap-4 flex-1">
                           <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-1">
                             <svg
@@ -1545,17 +1645,11 @@ export default function BookAppointmentPage() {
                               Vehicle
                             </p>
                             <p className="font-semibold text-gray-900">
-                              {
-                                vehicleTypes.find(
-                                  (vehicle) =>
-                                    vehicle.id === selectedVehicleType,
-                                )?.icon
-                              }{" "}
                               {selectedVehicleType}
                             </p>
                             {makeModel && (
                               <p className="text-xs text-gray-600 mt-1">
-                                {makeModel} {year ? `• ${year}` : ""}
+                                {makeModel} {year ? `- ${year}` : ""}
                               </p>
                             )}
                           </div>
@@ -1569,7 +1663,7 @@ export default function BookAppointmentPage() {
                       </div>
 
                       {/* Date Card */}
-                      <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 flex justify-between items-start">
+                      <div className="flex min-h-28 items-start justify-between rounded-2xl border border-slate-200 bg-linear-to-br from-white to-slate-50 p-4 shadow-[0_10px_22px_-19px_rgba(15,23,42,0.65),inset_0_1px_0_white] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
                         <div className="flex gap-4 flex-1">
                           <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-1">
                             <svg
@@ -1593,7 +1687,7 @@ export default function BookAppointmentPage() {
                             <p className="font-semibold text-gray-900">
                               {selectedDate
                                 ? `${selectedDate.toLocaleString("default", { month: "long" })} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`
-                                : "—"}
+                                : "Not selected"}
                             </p>
                           </div>
                         </div>
@@ -1606,7 +1700,7 @@ export default function BookAppointmentPage() {
                       </div>
 
                       {/* Time Card */}
-                      <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 flex justify-between items-start">
+                      <div className="flex min-h-28 items-start justify-between rounded-2xl border border-slate-200 bg-linear-to-br from-white to-slate-50 p-4 shadow-[0_10px_22px_-19px_rgba(15,23,42,0.65),inset_0_1px_0_white] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
                         <div className="flex gap-4 flex-1">
                           <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-1">
                             <svg
@@ -1628,7 +1722,7 @@ export default function BookAppointmentPage() {
                               Time
                             </p>
                             <p className="font-semibold text-gray-900">
-                              {selectedTime ?? "—"}
+                              {selectedTime ?? "Not selected"}
                             </p>
                           </div>
                         </div>
@@ -1641,7 +1735,7 @@ export default function BookAppointmentPage() {
                       </div>
 
                       {/* Contact Card */}
-                      <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 flex justify-between items-start">
+                      <div className="flex min-h-28 items-start justify-between rounded-2xl border border-slate-200 bg-linear-to-br from-white to-slate-50 p-4 shadow-[0_10px_22px_-19px_rgba(15,23,42,0.65),inset_0_1px_0_white] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
                         <div className="flex gap-4 flex-1">
                           <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-1">
                             <svg
@@ -1663,13 +1757,13 @@ export default function BookAppointmentPage() {
                               Contact
                             </p>
                             <p className="font-semibold text-gray-900">
-                              {fullName || "—"}
+                              {fullName || "Not provided"}
                             </p>
                             <p className="text-xs text-gray-600 mt-1">
-                              {emailAddress || "—"}
+                              {emailAddress || "Not provided"}
                             </p>
                             <p className="text-xs text-gray-600">
-                              {phoneNumber || "—"}
+                              {phoneNumber || "Not provided"}
                             </p>
                           </div>
                         </div>
@@ -1683,7 +1777,7 @@ export default function BookAppointmentPage() {
 
                       {/* Notes Card */}
                       {additionalNotes && (
-                        <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 flex justify-between items-start">
+                        <div className="flex min-h-28 items-start justify-between rounded-2xl border border-slate-200 bg-linear-to-br from-white to-slate-50 p-4 shadow-[0_10px_22px_-19px_rgba(15,23,42,0.65),inset_0_1px_0_white] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
                           <div className="flex gap-4 flex-1">
                             <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-1">
                               <svg
@@ -1802,16 +1896,34 @@ export default function BookAppointmentPage() {
             </div>
 
             {/* Right Container: Summary */}
-            <div className="w-full lg:w-1/3 flex flex-col gap-6">
+            <div className="flex w-full flex-col gap-6 lg:sticky lg:top-6 lg:w-1/3">
               {/* Booking Summary Box */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="bg-blue-600 p-6 text-white">
-                  <h3 className="text-xl font-bold">Booking Summary</h3>
-                  <p className="text-blue-100 text-sm mt-1">
+              <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_22px_48px_-28px_rgba(15,23,42,0.5),0_3px_8px_rgba(15,23,42,0.08)]">
+                <div className="relative overflow-hidden bg-linear-to-br from-blue-600 via-blue-700 to-slate-900 p-6 text-white">
+                  <div className="absolute -top-16 -right-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+                  <div className="relative mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m5-3a9 9 0 1 1-16 0 9 9 0 0 1 16 0Z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="relative text-xl font-extrabold tracking-tight">
+                    Booking Summary
+                  </h3>
+                  <p className="relative mt-1 text-sm text-blue-100">
                     Your selections so far
                   </p>
                 </div>
-                <div className="p-6 flex flex-col gap-6">
+                <div className="flex flex-col gap-6 p-6">
                   <div className="flex gap-4">
                     <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                       <svg
@@ -1838,7 +1950,7 @@ export default function BookAppointmentPage() {
                               .filter((s) => selectedServices.includes(s.id))
                               .map((s) => s.title)
                               .join(", ")
-                          : "—"}
+                          : "Not selected"}
                       </p>
                     </div>
                   </div>
@@ -1864,12 +1976,7 @@ export default function BookAppointmentPage() {
                         Vehicle
                       </p>
                       <p className="text-sm font-semibold text-gray-900">
-                        {
-                          vehicleTypes.find(
-                            (vehicle) => vehicle.id === selectedVehicleType,
-                          )?.icon
-                        }{" "}
-                        {selectedVehicleType ?? "—"}
+                        {selectedVehicleType ?? "Not selected"}
                       </p>
                     </div>
                   </div>
@@ -1897,7 +2004,7 @@ export default function BookAppointmentPage() {
                       <p className="text-sm font-semibold text-gray-900">
                         {selectedDate
                           ? `${selectedDate.toLocaleString("default", { month: "long" })} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`
-                          : "—"}
+                          : "Not selected"}
                       </p>
                     </div>
                   </div>
@@ -1923,7 +2030,7 @@ export default function BookAppointmentPage() {
                         Time
                       </p>
                       <p className="text-sm font-semibold text-gray-900">
-                        {selectedTime ?? "—"}
+                        {selectedTime ?? "Not selected"}
                       </p>
                     </div>
                   </div>
@@ -1949,28 +2056,48 @@ export default function BookAppointmentPage() {
                         Name
                       </p>
                       <p className="text-sm font-semibold text-gray-900">
-                        {fullName || "—"}
+                        {fullName || "Not provided"}
                       </p>
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-100 mt-2 pt-4 flex justify-between items-center">
-                    <p className="text-sm text-gray-500">Est. Duration</p>
-                    <p className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                  <div className="mt-2 flex items-center justify-between rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Est. Duration
+                    </p>
+                    <p className="rounded-lg bg-white px-3 py-1.5 text-xs font-extrabold text-blue-700 shadow-sm ring-1 ring-blue-100">
                       {selectedServices.length > 0
                         ? services
                             .filter((s) => selectedServices.includes(s.id))
                             .map((s) => s.time)
                             .join(", ")
-                        : "—"}
+                        : "Not provided"}
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* What to Expect Box */}
-              <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6">
-                <h4 className="font-bold text-blue-900 mb-4">What to Expect</h4>
+              <div className="relative overflow-hidden rounded-3xl border border-blue-100 bg-linear-to-br from-blue-50 to-white p-6 shadow-[0_16px_36px_-28px_rgba(37,99,235,0.65)]">
+                <div className="absolute -right-16 -bottom-16 h-40 w-40 rounded-full bg-blue-100/80 blur-2xl" />
+                <h4 className="relative mb-4 flex items-center gap-2 font-extrabold text-blue-950">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-md">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                      />
+                    </svg>
+                  </span>
+                  What to Expect
+                </h4>
                 <ul className="space-y-3">
                   <li className="flex items-start text-sm text-blue-800">
                     <svg
@@ -2045,16 +2172,16 @@ export default function BookAppointmentPage() {
 
       {/* Confirmation Modal */}
       {showConfirmation && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm">
+          <div className="relative max-h-[92vh] w-full max-w-md overflow-y-auto rounded-3xl border border-white/80 bg-white p-6 shadow-[0_35px_90px_-25px_rgba(2,6,23,0.7)] sm:p-8">
             {/* Top Blue Line */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-t-2xl"></div>
+            <div className="absolute top-0 right-0 left-0 h-1.5 rounded-t-3xl bg-linear-to-r from-blue-400 via-blue-600 to-slate-900"></div>
 
             {/* Success Icon */}
-            <div className="flex justify-center mb-6 pt-4">
-              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+            <div className="mb-6 flex justify-center pt-4">
+              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-linear-to-br from-emerald-400 to-emerald-600 text-white shadow-[0_16px_34px_-12px_rgba(5,150,105,0.7)] ring-8 ring-emerald-50">
                 <svg
-                  className="w-8 h-8 text-green-600"
+                  className="h-10 w-10"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -2070,7 +2197,10 @@ export default function BookAppointmentPage() {
             </div>
 
             {/* Heading */}
-            <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
+            <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-600">
+              Appointment secured
+            </p>
+            <h2 className="mb-2 text-center text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
               Booking Confirmed!
             </h2>
             <p className="text-center text-sm text-gray-600 mb-6">
@@ -2078,12 +2208,12 @@ export default function BookAppointmentPage() {
             </p>
 
             {/* Booking Details Box */}
-            <div className="bg-blue-50 rounded-lg border border-blue-200 p-4 mb-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="mb-6 rounded-2xl border border-blue-200 bg-linear-to-br from-blue-50 to-white p-5 shadow-[inset_0_1px_0_white]">
+              <div className="mb-4 flex items-center justify-between gap-3 border-b border-blue-100 pb-4">
                 <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
                   Booking Reference
                 </span>
-                <span className="text-sm font-bold text-blue-600">
+                <span className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-extrabold tracking-wide text-white shadow-md">
                   {bookingRef}
                 </span>
               </div>
@@ -2124,10 +2254,6 @@ export default function BookAppointmentPage() {
                     />
                   </svg>
                   <span className="text-gray-700 font-medium">
-                    {
-                      vehicleTypes.find((v) => v.id === selectedVehicleType)
-                        ?.icon
-                    }{" "}
                     {selectedVehicleType}
                   </span>
                 </div>
@@ -2148,7 +2274,7 @@ export default function BookAppointmentPage() {
                   <span className="text-gray-700 font-medium">
                     {selectedDate
                       ? `${selectedDate.toLocaleString("default", { month: "long" })} ${selectedDate.getDate()}, ${selectedDate.getFullYear()}`
-                      : "—"}
+                      : "Not selected"}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -2190,7 +2316,7 @@ export default function BookAppointmentPage() {
 
             {/* Email Confirmation Message */}
             <div
-              className={`rounded-lg border p-4 mb-6 ${
+              className={`mb-6 rounded-2xl border p-4 shadow-sm ${
                 emailStatus === "sent"
                   ? "border-green-200 bg-green-50"
                   : "border-amber-200 bg-amber-50"
@@ -2215,7 +2341,7 @@ export default function BookAppointmentPage() {
             </div>
 
             {/* Action Buttons: primary + clear Close (side-by-side for clarity) */}
-            <div className="mt-4 flex gap-3">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <button
                 onClick={() => {
                   setShowConfirmation(false);
@@ -2233,7 +2359,7 @@ export default function BookAppointmentPage() {
                   setBookingRef("");
                   setEmailStatus("idle");
                 }}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full shadow-md transition-all flex items-center justify-center gap-2"
+                className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-blue-700 px-5 py-3 text-sm font-bold text-white shadow-[0_14px_26px_-11px_rgba(37,99,235,0.85)] transition-all hover:-translate-y-0.5 hover:from-blue-700 hover:to-blue-800"
               >
                 <svg
                   className="w-4 h-4"
@@ -2268,7 +2394,7 @@ export default function BookAppointmentPage() {
                   setBookingRef("");
                   setEmailStatus("idle");
                 }}
-                className="flex-1 bg-white border-2 border-blue-200 hover:border-blue-300 text-blue-600 font-medium py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2"
+                className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:text-blue-700 hover:shadow-md"
                 aria-label="Close and reset form"
               >
                 <svg
