@@ -3,10 +3,12 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  type User,
 } from "firebase/auth";
 import {
   getFirestore,
   doc,
+  getDoc,
   setDoc,
   serverTimestamp,
   collection,
@@ -41,12 +43,28 @@ export const signInWithGoogle = () => {
   return signInWithPopup(auth, googleProvider);
 };
 
+export const getUserRole = async (userId: string): Promise<string> => {
+  if (!userId) return "User";
+
+  try {
+    const profileSnapshot = await getDoc(doc(db, "Users", userId));
+    const profileData = profileSnapshot.exists() ? profileSnapshot.data() : null;
+    return profileData?.role ?? "User";
+  } catch (error) {
+    console.error("Error reading user role from Firestore:", error);
+    return "User";
+  }
+};
+
 /**
  * Creates a user document in Firestore.
  * @param {import("firebase/auth").User} user - The user object from Firebase Auth.
  * @param {object} additionalData - Additional data to merge into the user document.
  */
-export const createUserDocument = async (user, additionalData = {}) => {
+export const createUserDocument = async (
+  user: User | null,
+  additionalData: Record<string, unknown> = {},
+) => {
   if (!user) return;
 
   const userRef = doc(db, "Users", user.uid);
@@ -73,7 +91,9 @@ export const createUserDocument = async (user, additionalData = {}) => {
  * Adds a feedback document to the "Feedbacks" collection in Firestore.
  * @param {object} feedbackData - The feedback data to be saved.
  */
-export const addFeedbackDocument = async (feedbackData) => {
+export const addFeedbackDocument = async (
+  feedbackData: Record<string, unknown>,
+) => {
   try {
     await addDoc(collection(db, "Feedbacks"), {
       ...feedbackData,

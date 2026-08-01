@@ -1,12 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth, signInWithGoogle, createUserDocument } from "@/lib/firebase";
+import {
+  auth,
+  signInWithGoogle,
+  createUserDocument,
+  getUserRole,
+} from "@/lib/firebase";
 import {
   signInWithEmailAndPassword,
   getAdditionalUserInfo,
+  onAuthStateChanged,
 } from "firebase/auth";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 
@@ -19,6 +25,22 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) return;
+
+      const role = await getUserRole(currentUser.uid);
+      router.replace(role === "Admin" ? "/admin" : "/");
+    });
+
+    return unsubscribe;
+  }, [router]);
+
+  const redirectAfterLogin = async (userId: string) => {
+    const role = await getUserRole(userId);
+    router.replace(role === "Admin" ? "/admin" : "/");
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,9 +56,13 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      router.push("/"); // Redirect to home on success
-    } catch (err: any) {
+      const result = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password,
+      );
+      await redirectAfterLogin(result.user.uid);
+    } catch (err: unknown) {
       setError("Invalid email or password. Please try again.");
       console.error("Login Error:", err);
     } finally {
@@ -52,9 +78,11 @@ export default function LoginPage() {
       if (additionalInfo?.isNewUser) {
         await createUserDocument(result.user);
       }
-      router.push("/"); // Redirect to home on success
-    } catch (err: any) {
-      if (err.code === "auth/popup-closed-by-user") {
+      await redirectAfterLogin(result.user.uid);
+    } catch (err: unknown) {
+      const authError = err as { code?: string };
+
+      if (authError.code === "auth/popup-closed-by-user") {
         setError("Google Sign-In was cancelled.");
       } else {
         setError("Failed to sign in with Google. Please try again.");
@@ -80,9 +108,9 @@ export default function LoginPage() {
           </button>
 
           <div className="flex items-center">
-            <div className="flex-grow border-t border-slate-200"></div>
+            <div className="grow border-t border-slate-200"></div>
             <span className="mx-4 text-sm font-medium text-slate-400">OR</span>
-            <div className="flex-grow border-t border-slate-200"></div>
+            <div className="grow border-t border-slate-200"></div>
           </div>
         </div>
 
@@ -160,7 +188,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-slate-700">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/auth/sign-up"
             className="font-semibold text-blue-600 hover:text-blue-500"

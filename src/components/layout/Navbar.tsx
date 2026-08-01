@@ -5,8 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import LogoutConfirmationModal from "../forms/LogoutConfirmationModal";
 
 type DropdownKey = "services" | "spare-parts";
@@ -132,6 +133,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [desktopDropdown, setDesktopDropdown] = useState<DropdownKey | null>(
     null,
   );
@@ -185,11 +187,27 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    setIsMobileMenuOpen(false);
-    setDesktopDropdown(null);
-    setMobileDropdown(null);
-    setIsUserMenuOpen(false);
-  }, [pathname]);
+    const loadUserRole = async () => {
+      if (!user) {
+        setUserRole(null);
+        return;
+      }
+
+      try {
+        const profileSnapshot = await getDoc(doc(db, "Users", user.uid));
+        const profileData = profileSnapshot.exists()
+          ? (profileSnapshot.data() as { role?: string })
+          : null;
+
+        setUserRole(profileData?.role ?? "User");
+      } catch (error) {
+        console.error("Could not load the nav role:", error);
+        setUserRole(null);
+      }
+    };
+
+    void loadUserRole();
+  }, [user]);
 
   useEffect(() => {
     document.body.style.overflow =
@@ -309,7 +327,7 @@ export default function Navbar() {
         }`}
       >
         <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-2 shadow-[0_24px_70px_-24px_rgba(15,23,42,0.38)] backdrop-blur-xl">
-          <div className="rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 px-5 py-4 text-white">
+          <div className="rounded-2xl bg-linear-to-br from-slate-950 via-slate-900 to-blue-950 px-5 py-4 text-white">
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-300">
               {eyebrow}
             </p>
@@ -414,7 +432,7 @@ export default function Navbar() {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50">
-        <div className="h-1 bg-gradient-to-r from-cyan-400 via-blue-600 to-indigo-600" />
+        <div className="h-1 bg-linear-to-r from-cyan-400 via-blue-600 to-indigo-600" />
 
         <div
           className={`border-b transition-all duration-300 ${
@@ -424,8 +442,8 @@ export default function Navbar() {
           }`}
         >
           <div
-            className={`mx-auto flex w-full max-w-[1536px] items-center justify-between px-4 transition-all duration-300 sm:px-6 lg:px-8 ${
-              isScrolled ? "h-[66px]" : "h-[82px]"
+            className={`mx-auto flex w-full max-w-384 items-center justify-between px-4 transition-all duration-300 sm:px-6 lg:px-8 ${
+              isScrolled ? "h-16.5" : "h-20.5"
             }`}
           >
             <Link
@@ -434,7 +452,7 @@ export default function Navbar() {
               aria-label="Mist Auto A/C home"
             >
               <span
-                className={`relative shrink-0 overflow-hidden rounded-2xl border border-white bg-white shadow-[0_10px_28px_-12px_rgba(37,99,235,0.55)] ring-1 ring-slate-200 transition-all duration-300 group-hover:-translate-y-0.5 ${
+                  className={`relative shrink-0 overflow-hidden rounded-2xl border border-white bg-white shadow-[0_10px_28px_-12px_rgba(37,99,235,0.55)] ring-1 ring-slate-200 transition-all duration-300 group-hover:-translate-y-0.5 ${
                   isScrolled ? "h-11 w-11" : "h-12 w-12 sm:h-14 sm:w-14"
                 }`}
               >
@@ -536,6 +554,14 @@ export default function Navbar() {
                     Contact
                   </Link>
                 </li>
+
+                {userRole === "Admin" ? (
+                  <li>
+                    <Link href="/admin" className={desktopLinkClass("/admin")}>
+                      Admin Panel
+                    </Link>
+                  </li>
+                ) : null}
               </ul>
             </nav>
 
@@ -549,12 +575,12 @@ export default function Navbar() {
                     aria-haspopup="menu"
                     aria-expanded={isUserMenuOpen}
                   >
-                    <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-extrabold text-white shadow-md shadow-blue-600/20">
+                    <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 text-sm font-extrabold text-white shadow-md shadow-blue-600/20">
                       {userInitials}
                       <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                     </span>
                     <span className="hidden min-w-0 text-left 2xl:block">
-                      <span className="block max-w-[7rem] truncate text-sm font-bold text-slate-800">
+                      <span className="block max-w-28 truncate text-sm font-bold text-slate-800">
                         {displayName}
                       </span>
                       <span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
@@ -574,7 +600,7 @@ export default function Navbar() {
                     }`}
                   >
                     <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-2 shadow-[0_24px_70px_-24px_rgba(15,23,42,0.4)] backdrop-blur-xl">
-                      <div className="rounded-2xl bg-gradient-to-br from-slate-950 to-blue-950 p-4 text-white">
+                      <div className="rounded-2xl bg-linear-to-br from-slate-950 to-blue-950 p-4 text-white">
                         <div className="flex items-center gap-3">
                           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-base font-extrabold ring-1 ring-white/15">
                             {userInitials}
@@ -602,6 +628,19 @@ export default function Navbar() {
                           My Profile
                           <ArrowIcon />
                         </button>
+                        {userRole === "Admin" ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              router.push("/admin");
+                            }}
+                            className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm font-semibold text-cyan-700 transition-colors hover:bg-cyan-50 hover:text-cyan-900"
+                          >
+                            Admin Dashboard
+                            <ArrowIcon />
+                          </button>
+                        ) : null}
                         <button
                           type="button"
                           onClick={() => {
@@ -639,7 +678,7 @@ export default function Navbar() {
                   </Link>
                   <Link
                     href="/auth/sign-up"
-                    className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-600/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:translate-y-0"
+                    className="group inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-600/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:translate-y-0"
                   >
                     Sign Up
                     <span className="transition-transform group-hover:translate-x-0.5">
@@ -668,7 +707,7 @@ export default function Navbar() {
       </header>
 
       <div
-        className={`fixed inset-0 z-[60] bg-slate-950/55 backdrop-blur-sm transition-opacity duration-300 xl:hidden ${
+        className={`fixed inset-0 z-60 bg-slate-950/55 backdrop-blur-sm transition-opacity duration-300 xl:hidden ${
           isMobileMenuOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
@@ -678,14 +717,14 @@ export default function Navbar() {
       />
 
       <aside
-        className={`fixed inset-y-0 right-0 z-[70] flex w-[360px] max-w-[92vw] flex-col border-l border-white/10 bg-white shadow-[-30px_0_80px_-35px_rgba(15,23,42,0.6)] transition-transform duration-300 ease-out xl:hidden ${
+        className={`fixed inset-y-0 right-0 z-70 flex w-90 max-w-[92vw] flex-col border-l border-white/10 bg-white shadow-[-30px_0_80px_-35px_rgba(15,23,42,0.6)] transition-transform duration-300 ease-out xl:hidden ${
           isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
         aria-modal="true"
         aria-label="Mobile navigation"
       >
-        <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 px-5 pb-5 pt-6 text-white">
+        <div className="relative overflow-hidden bg-linear-to-br from-slate-950 via-slate-900 to-blue-950 px-5 pb-5 pt-6 text-white">
           <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl" />
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -716,7 +755,7 @@ export default function Navbar() {
               <CloseIcon />
             </button>
           </div>
-          <p className="relative mt-5 max-w-[260px] text-sm leading-6 text-slate-300">
+          <p className="relative mt-5 max-w-65 text-sm leading-6 text-slate-300">
             Professional cooling services and trusted spare parts, all in one
             place.
           </p>
@@ -755,6 +794,13 @@ export default function Navbar() {
               Contact
               <ArrowIcon />
             </Link>
+
+            {userRole === "Admin" ? (
+              <Link href="/admin" className={mobileLinkClass("/admin")}>
+                Admin Panel
+                <ArrowIcon />
+              </Link>
+            ) : null}
           </div>
         </nav>
 
@@ -762,7 +808,7 @@ export default function Navbar() {
           {user ? (
             <div className="space-y-3">
               <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-                <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-extrabold text-white">
+                <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-blue-600 to-indigo-600 text-sm font-extrabold text-white">
                   {userInitials}
                   <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                 </span>
@@ -799,6 +845,19 @@ export default function Navbar() {
                 </button>
               </div>
 
+              {userRole === "Admin" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    router.push("/admin");
+                  }}
+                  className="w-full rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2.5 text-sm font-bold text-cyan-800 transition-colors hover:bg-cyan-100"
+                >
+                  Admin Dashboard
+                </button>
+              ) : null}
+
               <button
                 type="button"
                 onClick={() => {
@@ -820,7 +879,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/auth/sign-up"
-                className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-center text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-transform active:scale-[0.98]"
+                className="rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-4 py-3 text-center text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-transform active:scale-[0.98]"
               >
                 Sign Up
               </Link>
@@ -829,7 +888,7 @@ export default function Navbar() {
         </div>
       </aside>
 
-      <div className="h-[86px] bg-white" aria-hidden="true" />
+      <div className="h-21.5 bg-white" aria-hidden="true" />
 
       <LogoutConfirmationModal
         isOpen={isLogoutModalOpen}
