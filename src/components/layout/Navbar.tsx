@@ -452,7 +452,7 @@ export default function Navbar() {
               aria-label="Mist Auto A/C home"
             >
               <span
-                  className={`relative shrink-0 overflow-hidden rounded-2xl border border-white bg-white shadow-[0_10px_28px_-12px_rgba(37,99,235,0.55)] ring-1 ring-slate-200 transition-all duration-300 group-hover:-translate-y-0.5 ${
+                className={`relative shrink-0 overflow-hidden rounded-2xl border border-white bg-white shadow-[0_10px_28px_-12px_rgba(37,99,235,0.55)] ring-1 ring-slate-200 transition-all duration-300 group-hover:-translate-y-0.5 ${
                   isScrolled ? "h-11 w-11" : "h-12 w-12 sm:h-14 sm:w-14"
                 }`}
               >

@@ -48,7 +48,9 @@ export const getUserRole = async (userId: string): Promise<string> => {
 
   try {
     const profileSnapshot = await getDoc(doc(db, "Users", userId));
-    const profileData = profileSnapshot.exists() ? profileSnapshot.data() : null;
+    const profileData = profileSnapshot.exists()
+      ? profileSnapshot.data()
+      : null;
     return profileData?.role ?? "User";
   } catch (error) {
     console.error("Error reading user role from Firestore:", error);

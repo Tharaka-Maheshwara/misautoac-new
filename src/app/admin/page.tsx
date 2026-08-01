@@ -63,6 +63,11 @@ type AppointmentStatus =
 
 type DateView = "all" | "today" | "month" | "range";
 
+type ReservedTime = {
+  time: string;
+  source: "Admin" | "Client";
+};
+
 const statusOptions: AppointmentStatus[] = [
   "All",
   "Scheduled",
@@ -228,6 +233,11 @@ export default function AdminPage() {
   const [isSavingReservation, setIsSavingReservation] = useState(false);
   const [reservationError, setReservationError] = useState<string | null>(null);
   const [reservationSuccess, setReservationSuccess] = useState(false);
+  const [reservedTimes, setReservedTimes] = useState<ReservedTime[]>([]);
+  const [isLoadingReservedTimes, setIsLoadingReservedTimes] = useState(false);
+  const [reservedTimesError, setReservedTimesError] = useState<string | null>(
+    null,
+  );
 
   async function loadAppointments() {
     setIsLoading(true);
@@ -385,6 +395,8 @@ export default function AdminPage() {
     setReservationReason("");
     setReservationError(null);
     setReservationSuccess(false);
+    setReservedTimes([]);
+    setReservedTimesError(null);
     setIsReserveModalOpen(true);
   }
 
@@ -446,7 +458,17 @@ export default function AdminPage() {
         createdAt: serverTimestamp(),
       });
 
+      const newlyReservedTime = reservationTime;
       setReservationSuccess(true);
+      setReservedTimes((current) => {
+        if (current.some((slot) => slot.time === newlyReservedTime)) {
+          return current;
+        }
+        return [
+          ...current,
+          { time: newlyReservedTime, source: "Admin" as const },
+        ];
+      });
       setReservationTime("");
     } catch (error) {
       console.error("Could not reserve appointment time:", error);
@@ -457,6 +479,71 @@ export default function AdminPage() {
       setIsSavingReservation(false);
     }
   }
+
+  useEffect(() => {
+    if (!isReserveModalOpen || !reservationDate) {
+      setReservedTimes([]);
+      setReservedTimesError(null);
+      setIsLoadingReservedTimes(false);
+      return;
+    }
+
+    let isCancelled = false;
+
+    async function loadReservedTimes() {
+      const selectedDate = parseDateInput(reservationDate);
+      if (!selectedDate) return;
+
+      setIsLoadingReservedTimes(true);
+      setReservedTimesError(null);
+      setReservedTimes([]);
+
+      try {
+        const slotsQuery = query(
+          collection(db, "BookedSlots"),
+          where("appointmentDate", ">=", startOfDay(selectedDate)),
+          where("appointmentDate", "<=", endOfDay(selectedDate)),
+        );
+        const snapshot = await getDocs(slotsQuery);
+
+        const slotsByTime = new Map<string, ReservedTime>();
+        snapshot.docs.forEach((slotDocument) => {
+          const data = slotDocument.data() as {
+            appointmentTime?: string;
+            source?: string;
+            type?: string;
+          };
+          if (!data.appointmentTime) return;
+
+          const source: ReservedTime["source"] =
+            data.source === "Admin" || data.type === "Admin Reservation"
+              ? "Admin"
+              : "Client";
+          slotsByTime.set(data.appointmentTime, {
+            time: data.appointmentTime,
+            source,
+          });
+        });
+
+        if (!isCancelled) setReservedTimes(Array.from(slotsByTime.values()));
+      } catch (error) {
+        console.error("Could not load reserved times:", error);
+        if (!isCancelled) {
+          setReservedTimesError(
+            "Booked times could not be checked. Please refresh and try again.",
+          );
+        }
+      } finally {
+        if (!isCancelled) setIsLoadingReservedTimes(false);
+      }
+    }
+
+    void loadReservedTimes();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isReserveModalOpen, reservationDate]);
 
   useEffect(() => {
     if (!selectedAppointment && !isReserveModalOpen) return;
@@ -1051,8 +1138,12 @@ export default function AdminPage() {
           error={reservationError}
           success={reservationSuccess}
           isSaving={isSavingReservation}
+          reservedTimes={reservedTimes}
+          isLoadingReservedTimes={isLoadingReservedTimes}
+          reservedTimesError={reservedTimesError}
           onDateChange={(value) => {
             setReservationDate(value);
+            setReservationTime("");
             setReservationError(null);
             setReservationSuccess(false);
           }}
@@ -1077,6 +1168,9 @@ type ReserveTimeSlotModalProps = {
   error: string | null;
   success: boolean;
   isSaving: boolean;
+  reservedTimes: ReservedTime[];
+  isLoadingReservedTimes: boolean;
+  reservedTimesError: string | null;
   onDateChange: (value: string) => void;
   onTimeChange: (value: string) => void;
   onReasonChange: (value: string) => void;
@@ -1091,6 +1185,9 @@ function ReserveTimeSlotModal({
   error,
   success,
   isSaving,
+  reservedTimes,
+  isLoadingReservedTimes,
+  reservedTimesError,
   onDateChange,
   onTimeChange,
   onReasonChange,
@@ -1162,26 +1259,100 @@ function ReserveTimeSlotModal({
           </label>
 
           <div>
-            <p className="mb-3 text-sm font-bold text-slate-800">
-              Select time <span className="text-rose-500">*</span>
-            </p>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-5">
-              {BOOKING_TIMES.map((availableTime) => (
-                <button
-                  key={availableTime}
-                  type="button"
-                  onClick={() => onTimeChange(availableTime)}
-                  className={`flex min-h-12 items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-sm font-bold transition ${
-                    time === availableTime
-                      ? "border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                      : "border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50"
-                  }`}
-                >
-                  <ClockIcon className="h-4 w-4" />
-                  {availableTime}
-                </button>
-              ))}
+            <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm font-bold text-slate-800">
+                Select time <span className="text-rose-500">*</span>
+              </p>
+              {date && !isLoadingReservedTimes ? (
+                <p className="text-xs font-semibold text-slate-500">
+                  {reservedTimes.length} of {BOOKING_TIMES.length} times already
+                  booked
+                </p>
+              ) : null}
             </div>
+
+            {isLoadingReservedTimes ? (
+              <div className="mb-3 flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm font-medium text-blue-700">
+                <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                Checking existing client and admin bookings...
+              </div>
+            ) : null}
+
+            {reservedTimesError ? (
+              <div className="mb-3 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+                <ExclamationTriangleIcon className="h-5 w-5 shrink-0" />
+                {reservedTimesError}
+              </div>
+            ) : null}
+
+            {!date ? (
+              <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-medium text-amber-800">
+                Select a date first to check available times.
+              </div>
+            ) : null}
+
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-5">
+              {BOOKING_TIMES.map((availableTime) => {
+                const reservedSlot = reservedTimes.find(
+                  (slot) => slot.time === availableTime,
+                );
+                const isUnavailable = Boolean(reservedSlot);
+
+                return (
+                  <button
+                    key={availableTime}
+                    type="button"
+                    disabled={
+                      !date ||
+                      isUnavailable ||
+                      isLoadingReservedTimes ||
+                      Boolean(reservedTimesError)
+                    }
+                    onClick={() => onTimeChange(availableTime)}
+                    className={`flex min-h-14 flex-col items-center justify-center rounded-xl border px-2 py-2 text-sm font-bold transition ${
+                      isUnavailable
+                        ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                        : time === availableTime
+                          ? "border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      {isUnavailable ? (
+                        <LockClosedIcon className="h-4 w-4" />
+                      ) : (
+                        <ClockIcon className="h-4 w-4" />
+                      )}
+                      {availableTime}
+                    </span>
+                    {reservedSlot ? (
+                      <span className="mt-1 text-[9px] font-black uppercase tracking-wider">
+                        {reservedSlot.source === "Admin"
+                          ? "Admin reserved"
+                          : "Client booked"}
+                      </span>
+                    ) : (
+                      <span className="mt-1 text-[9px] font-semibold uppercase tracking-wider opacity-70">
+                        Available
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {date && !isLoadingReservedTimes && !reservedTimesError ? (
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-slate-500">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-blue-600" />
+                  Available / selected
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+                  Already booked — cannot select
+                </span>
+              </div>
+            ) : null}
           </div>
 
           <label className="block">
@@ -1230,7 +1401,13 @@ function ReserveTimeSlotModal({
             <button
               type="button"
               onClick={onSave}
-              disabled={isSaving || !date || !time}
+              disabled={
+                isSaving ||
+                isLoadingReservedTimes ||
+                Boolean(reservedTimesError) ||
+                !date ||
+                !time
+              }
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSaving ? (
