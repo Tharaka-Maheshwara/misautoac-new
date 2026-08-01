@@ -178,63 +178,96 @@ export default function BookAppointmentPage() {
 
       setBookingRef(appointmentId);
 
-      // The appointment is already saved at this point. Email failures must
-      // never remove or incorrectly report the successful Firebase booking.
-      try {
-        const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
-        const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
-        const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
+      // The appointment is already saved at this point. Client and admin
+      // emails are sent independently, so an email failure never rolls back
+      // or incorrectly reports the successful Firebase booking.
+      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+      const clientTemplateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+      const adminTemplateId = process.env.NEXT_PUBLIC_EMAILJS_ADMIN_TEMPLATE_ID;
+      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
 
-        if (!serviceId || !templateId || !publicKey) {
-          throw new Error("EmailJS environment variables are missing.");
+      const templateParams = {
+        booking_ref: appointmentId,
+        customer_name: fullName.trim(),
+        customer_email: emailAddress.trim(),
+        customer_phone: phoneNumber.trim(),
+        appointment_date:
+          selectedDate?.toLocaleDateString("en-GB", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }) ?? "Not specified",
+        appointment_time: selectedTime ?? "Not specified",
+        services: serviceTitles.map((service) => `• ${service}`).join("\n"),
+        vehicle_type: selectedVehicleType ?? "Not specified",
+        make_model: makeModel.trim() || "Not specified",
+        vehicle_year: year.trim() || "Not specified",
+        notes: additionalNotes.trim() || "No additional notes provided.",
+      };
+
+      const missingEmailConfig = [
+        ["NEXT_PUBLIC_EMAILJS_SERVICE_ID", serviceId],
+        ["NEXT_PUBLIC_EMAILJS_TEMPLATE_ID", clientTemplateId],
+        ["NEXT_PUBLIC_EMAILJS_ADMIN_TEMPLATE_ID", adminTemplateId],
+        ["NEXT_PUBLIC_EMAILJS_PUBLIC_KEY", publicKey],
+      ]
+        .filter(([, value]) => !value)
+        .map(([name]) => name);
+
+      if (missingEmailConfig.length > 0) {
+        console.error(
+          `EmailJS configuration missing: ${missingEmailConfig.join(", ")}`,
+        );
+        setEmailStatus("failed");
+      } else {
+        const [clientEmailResult, adminEmailResult] = await Promise.allSettled([
+          emailjs.send(
+            serviceId as string,
+            clientTemplateId as string,
+            templateParams,
+            { publicKey: publicKey as string },
+          ),
+          emailjs.send(
+            serviceId as string,
+            adminTemplateId as string,
+            templateParams,
+            { publicKey: publicKey as string },
+          ),
+        ]);
+
+        if (clientEmailResult.status === "fulfilled") {
+          setEmailStatus("sent");
+        } else {
+          const clientError = clientEmailResult.reason as {
+            status?: number;
+            text?: string;
+          };
+          console.error("Client confirmation email failed:", {
+            status: clientError?.status,
+            message:
+              clientError?.text ??
+              (clientEmailResult.reason instanceof Error
+                ? clientEmailResult.reason.message
+                : "Unknown EmailJS error"),
+          });
+          setEmailStatus("failed");
         }
 
-        await emailjs.send(
-          serviceId,
-          templateId,
-          {
-            booking_ref: appointmentId,
-            customer_name: fullName.trim(),
-            customer_email: emailAddress.trim(),
-            customer_phone: phoneNumber.trim(),
-            appointment_date:
-              selectedDate?.toLocaleDateString("en-GB", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              }) ?? "Not specified",
-            appointment_time: selectedTime ?? "Not specified",
-            services: serviceTitles.map((service) => `• ${service}`).join("\n"),
-            vehicle_type: selectedVehicleType ?? "Not specified",
-            make_model: makeModel.trim() || "Not specified",
-            vehicle_year: year.trim() || "Not specified",
-            notes: additionalNotes.trim() || "No additional notes provided.",
-          },
-          { publicKey },
-        );
-
-        setEmailStatus("sent");
-      } catch (emailError: unknown) {
-        const errorDetails = emailError as {
-          status?: number;
-          text?: string;
-        };
-
-        const errorMessage =
-          errorDetails.text ??
-          (emailError instanceof Error
-            ? emailError.message
-            : "Unknown EmailJS error");
-
-        console.warn("EmailJS status:", errorDetails.status);
-        console.warn("EmailJS message:", errorMessage);
-
-        window.alert(
-          `EmailJS error ${errorDetails.status ?? ""}: ${errorMessage}`,
-        );
-
-        setEmailStatus("failed");
+        if (adminEmailResult.status === "rejected") {
+          const adminError = adminEmailResult.reason as {
+            status?: number;
+            text?: string;
+          };
+          console.error("Admin appointment notification email failed:", {
+            status: adminError?.status,
+            message:
+              adminError?.text ??
+              (adminEmailResult.reason instanceof Error
+                ? adminEmailResult.reason.message
+                : "Unknown EmailJS error"),
+          });
+        }
       }
 
       setShowConfirmation(true);
