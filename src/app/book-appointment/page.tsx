@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import emailjs from "@emailjs/browser";
 import { db } from "@/lib/firebase";
 import {
   collection,
-  addDoc,
   serverTimestamp,
   query,
   where,
@@ -32,6 +32,9 @@ export default function BookAppointmentPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [bookingRef, setBookingRef] = useState("");
+  const [emailStatus, setEmailStatus] = useState<"idle" | "sent" | "failed">(
+    "idle",
+  );
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
   const [isLoadingTimes, setIsLoadingTimes] = useState<boolean>(false);
 
@@ -99,7 +102,10 @@ export default function BookAppointmentPage() {
 
   const startingDayOfWeek = firstDayOfMonth.getDay();
 
-  const calendarDays = Array.from({ length: startingDayOfWeek }, () => null).concat(
+  const calendarDays = Array.from(
+    { length: startingDayOfWeek },
+    () => null,
+  ).concat(
     Array.from({ length: daysInMonth }, (_, i) => {
       const dayDate = new Date(
         viewDate.getFullYear(),
@@ -111,15 +117,11 @@ export default function BookAppointmentPage() {
   );
 
   const handlePrevMonth = () => {
-    setViewDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
-    );
+    setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
   };
 
   const handleNextMonth = () => {
-    setViewDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
-    );
+    setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
   // --- End Calendar Logic ---
 
@@ -137,13 +139,14 @@ export default function BookAppointmentPage() {
   const handleBookingConfirmation = async () => {
     setIsSubmitting(true);
     setSubmissionError(null);
+    setEmailStatus("idle");
+
+    const serviceTitles = services
+      .filter((service) => selectedServices.includes(service.id))
+      .map((service) => service.title);
 
     try {
-      await runTransaction(db, async (transaction) => {
-        const serviceTitles = services
-          .filter((s) => selectedServices.includes(s.id))
-          .map((s) => s.title);
-
+      const appointmentId = await runTransaction(db, async (transaction) => {
         // 1. Create the private appointment document
         const appointmentData = {
           services: serviceTitles,
@@ -170,15 +173,74 @@ export default function BookAppointmentPage() {
         const bookedSlotRef = doc(collection(db, "BookedSlots"));
         transaction.set(bookedSlotRef, bookedSlotData);
 
-        setBookingRef(appointmentRef.id);
+        return appointmentRef.id;
       });
+
+      setBookingRef(appointmentId);
+
+      // The appointment is already saved at this point. Email failures must
+      // never remove or incorrectly report the successful Firebase booking.
+      try {
+        const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+        const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+        const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
+
+        if (!serviceId || !templateId || !publicKey) {
+          throw new Error("EmailJS environment variables are missing.");
+        }
+
+        await emailjs.send(
+          serviceId,
+          templateId,
+          {
+            booking_ref: appointmentId,
+            customer_name: fullName.trim(),
+            customer_email: emailAddress.trim(),
+            customer_phone: phoneNumber.trim(),
+            appointment_date:
+              selectedDate?.toLocaleDateString("en-GB", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }) ?? "Not specified",
+            appointment_time: selectedTime ?? "Not specified",
+            services: serviceTitles.map((service) => `• ${service}`).join("\n"),
+            vehicle_type: selectedVehicleType ?? "Not specified",
+            make_model: makeModel.trim() || "Not specified",
+            vehicle_year: year.trim() || "Not specified",
+            notes: additionalNotes.trim() || "No additional notes provided.",
+          },
+          { publicKey },
+        );
+
+        setEmailStatus("sent");
+      } catch (emailError: unknown) {
+        const errorDetails = emailError as {
+          status?: number;
+          text?: string;
+        };
+
+        const errorMessage =
+          errorDetails.text ??
+          (emailError instanceof Error
+            ? emailError.message
+            : "Unknown EmailJS error");
+
+        console.warn("EmailJS status:", errorDetails.status);
+        console.warn("EmailJS message:", errorMessage);
+
+        window.alert(
+          `EmailJS error ${errorDetails.status ?? ""}: ${errorMessage}`,
+        );
+
+        setEmailStatus("failed");
+      }
 
       setShowConfirmation(true);
     } catch (error) {
       console.error("Error in booking transaction: ", error);
-      setSubmissionError(
-        "Could not save your appointment. Please try again.",
-      );
+      setSubmissionError("Could not save your appointment. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -1998,18 +2060,29 @@ export default function BookAppointmentPage() {
             </div>
 
             {/* Email Confirmation Message */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <p className="text-xs text-gray-600 leading-relaxed">
-                <span className="font-semibold text-gray-900">
-                  A confirmation email has been sent to{" "}
-                </span>
-                <span className="font-semibold text-blue-600">
-                  {emailAddress}
-                </span>
-                <span className="text-gray-600">
-                  . We'll also call you 24 hours before your appointment.
-                </span>
-              </p>
+            <div
+              className={`rounded-lg border p-4 mb-6 ${
+                emailStatus === "sent"
+                  ? "border-green-200 bg-green-50"
+                  : "border-amber-200 bg-amber-50"
+              }`}
+            >
+              {emailStatus === "sent" ? (
+                <p className="text-xs leading-relaxed text-green-800">
+                  <span className="font-semibold">
+                    A confirmation email has been sent to{" "}
+                  </span>
+                  <span className="font-bold">{emailAddress}</span>.
+                </p>
+              ) : (
+                <p className="text-xs leading-relaxed text-amber-800">
+                  <span className="font-semibold">
+                    Your appointment was saved successfully,
+                  </span>{" "}
+                  but the confirmation email could not be sent. Please keep your
+                  booking reference: {bookingRef}.
+                </p>
+              )}
             </div>
 
             {/* Action Buttons: primary + clear Close (side-by-side for clarity) */}
@@ -2029,6 +2102,7 @@ export default function BookAppointmentPage() {
                   setSelectedDate(null);
                   setSelectedTime(null);
                   setBookingRef("");
+                  setEmailStatus("idle");
                 }}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full shadow-md transition-all flex items-center justify-center gap-2"
               >
@@ -2063,6 +2137,7 @@ export default function BookAppointmentPage() {
                   setSelectedDate(null);
                   setSelectedTime(null);
                   setBookingRef("");
+                  setEmailStatus("idle");
                 }}
                 className="flex-1 bg-white border-2 border-blue-200 hover:border-blue-300 text-blue-600 font-medium py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2"
                 aria-label="Close and reset form"
