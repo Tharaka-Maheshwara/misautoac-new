@@ -146,37 +146,64 @@ export default function BookAppointmentPage() {
       .map((service) => service.title);
 
     try {
-      const appointmentId = await runTransaction(db, async (transaction) => {
-        // 1. Create the private appointment document
-        const appointmentData = {
-          services: serviceTitles,
-          vehicleType: selectedVehicleType,
-          makeModel,
-          year,
-          appointmentDate: selectedDate,
-          appointmentTime: selectedTime,
-          customerName: fullName,
-          customerEmail: emailAddress,
-          customerPhone: phoneNumber,
-          notes: additionalNotes,
-          status: "Scheduled",
-          createdAt: serverTimestamp(),
-        };
-        const appointmentRef = doc(collection(db, "Appointments"));
-        transaction.set(appointmentRef, appointmentData);
+      const createdBookingRef = await runTransaction(
+        db,
+        async (transaction) => {
+          // Read the shared counter before performing any writes. Keeping the
+          // counter update inside this transaction prevents duplicate booking
+          // references when two customers submit at the same time.
+          const counterRef = doc(db, "Counters", "appointments");
+          const counterSnapshot = await transaction.get(counterRef);
+          const lastBookingNumber = counterSnapshot.exists()
+            ? Number(counterSnapshot.data().lastBookingNumber ?? 0)
+            : 0;
+          const nextBookingNumber = lastBookingNumber + 1;
+          const sequentialBookingRef = `Mist_Auto_${String(
+            nextBookingNumber,
+          ).padStart(3, "0")}`;
 
-        // 2. Create the public booked slot document
-        const bookedSlotData = {
-          appointmentDate: selectedDate,
-          appointmentTime: selectedTime,
-        };
-        const bookedSlotRef = doc(collection(db, "BookedSlots"));
-        transaction.set(bookedSlotRef, bookedSlotData);
+          // 1. Create the private appointment document
+          const appointmentRef = doc(collection(db, "Appointments"));
+          const appointmentData = {
+            bookingRef: sequentialBookingRef,
+            services: serviceTitles,
+            vehicleType: selectedVehicleType,
+            makeModel,
+            year,
+            appointmentDate: selectedDate,
+            appointmentTime: selectedTime,
+            customerName: fullName,
+            customerEmail: emailAddress,
+            customerPhone: phoneNumber,
+            notes: additionalNotes,
+            status: "Scheduled",
+            createdAt: serverTimestamp(),
+          };
+          transaction.set(appointmentRef, appointmentData);
 
-        return appointmentRef.id;
-      });
+          // 2. Create the public booked slot document
+          const bookedSlotData = {
+            appointmentDate: selectedDate,
+            appointmentTime: selectedTime,
+          };
+          const bookedSlotRef = doc(collection(db, "BookedSlots"));
+          transaction.set(bookedSlotRef, bookedSlotData);
 
-      setBookingRef(appointmentId);
+          // 3. Save the number used for the next appointment transaction.
+          transaction.set(
+            counterRef,
+            {
+              lastBookingNumber: nextBookingNumber,
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true },
+          );
+
+          return sequentialBookingRef;
+        },
+      );
+
+      setBookingRef(createdBookingRef);
 
       // The appointment is already saved at this point. Client and admin
       // emails are sent independently, so an email failure never rolls back
@@ -187,7 +214,7 @@ export default function BookAppointmentPage() {
       const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
 
       const templateParams = {
-        booking_ref: appointmentId,
+        booking_ref: createdBookingRef,
         customer_name: fullName.trim(),
         customer_email: emailAddress.trim(),
         customer_phone: phoneNumber.trim(),
