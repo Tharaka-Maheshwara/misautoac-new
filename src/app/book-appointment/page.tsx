@@ -307,15 +307,15 @@ export default function BookAppointmentPage() {
   };
 
   const vehicleTypes = [
-    { id: "Car", icon: "🚗" },
-    { id: "SUV", icon: "🚙" },
-    { id: "Truck", icon: "🛻" },
-    { id: "Van", icon: "🚐" },
-    { id: "Sports Car", icon: "🏎️" },
-    { id: "Luxury", icon: "🚘" },
-    { id: "Electric", icon: "⚡" },
-    { id: "Hybrid", icon: "🔋" },
-    { id: "Other", icon: "✨" },
+    { id: "Car", icon: "🚗", description: "Sedan & hatchback" },
+    { id: "SUV", icon: "🚙", description: "SUV & crossover" },
+    { id: "Truck", icon: "🛻", description: "Pickup & utility" },
+    { id: "Van", icon: "🚐", description: "Passenger & cargo" },
+    { id: "Sports Car", icon: "🏎️", description: "Performance vehicle" },
+    { id: "Luxury", icon: "🚘", description: "Premium vehicle" },
+    { id: "Electric", icon: "⚡", description: "Fully electric" },
+    { id: "Hybrid", icon: "🔋", description: "Hybrid powertrain" },
+    { id: "Other", icon: "✨", description: "Another vehicle type" },
   ];
 
   const services = [
@@ -729,11 +729,12 @@ export default function BookAppointmentPage() {
               <>
                 {currentStep === 2 && (
                   <>
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 flex-col">
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                    <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_20px_50px_-28px_rgba(15,23,42,0.45),0_2px_5px_rgba(15,23,42,0.08)] sm:p-7 md:p-8">
+                      <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-blue-100/70 blur-3xl" />
+                      <div className="relative mb-7 flex items-center gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-blue-500 to-blue-700 text-white shadow-[0_10px_22px_-8px_rgba(37,99,235,0.75),inset_0_1px_0_rgba(255,255,255,0.35)]">
                           <svg
-                            className="w-5 h-5"
+                            className="h-6 w-6"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -747,66 +748,134 @@ export default function BookAppointmentPage() {
                           </svg>
                         </div>
                         <div>
-                          <h2 className="text-xl font-bold text-gray-900">
+                          <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
+                            Step 02 · Vehicle details
+                          </p>
+                          <h2 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
                             Your Vehicle
                           </h2>
-                          <p className="text-sm text-gray-500">
-                            Select your vehicle type
+                          <p className="mt-1 text-sm text-slate-500">
+                            Choose the option that best describes your vehicle.
                           </p>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                      <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                         {vehicleTypes.map((t) => (
-                          <div
+                          <button
+                            type="button"
                             key={t.id}
                             onClick={() => {
                               setSelectedVehicleType(t.id);
                               setErrors((p) => ({ ...p, vehicle: undefined }));
                             }}
-                            className={`cursor-pointer rounded-xl border border-gray-200 p-4 flex flex-col items-center justify-center gap-2 transition-all ${
+                            aria-pressed={selectedVehicleType === t.id}
+                            className={`group relative min-h-28 overflow-hidden rounded-2xl border p-3.5 text-left outline-none transition-all duration-300 focus-visible:ring-4 focus-visible:ring-blue-500/20 sm:min-h-32 sm:p-4 ${
                               selectedVehicleType === t.id
-                                ? "border-blue-500 bg-blue-50 text-blue-600"
-                                : "bg-white hover:border-gray-300 text-gray-700"
+                                ? "-translate-y-1 border-blue-500 bg-linear-to-br from-blue-50 via-white to-blue-100/80 shadow-[0_16px_30px_-14px_rgba(37,99,235,0.55),inset_0_1px_0_white] ring-1 ring-blue-500/10"
+                                : "border-slate-200 bg-linear-to-br from-white to-slate-50 shadow-[0_8px_18px_-16px_rgba(15,23,42,0.65),inset_0_1px_0_white] hover:-translate-y-1 hover:border-blue-300 hover:shadow-[0_16px_28px_-16px_rgba(37,99,235,0.38),inset_0_1px_0_white]"
                             }`}
                           >
-                            <span className="text-2xl">{t.icon}</span>
-                            <span className="text-xs font-semibold">
+                            <span
+                              className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-xl shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-11 sm:w-11 sm:text-2xl ${
+                                selectedVehicleType === t.id
+                                  ? "bg-blue-600 ring-4 ring-blue-100"
+                                  : "border border-slate-200 bg-white"
+                              }`}
+                            >
+                              {t.icon}
+                            </span>
+                            <span className="block text-xs font-bold text-slate-900 sm:text-sm">
                               {t.id}
                             </span>
-                          </div>
+                            <span className="mt-1 hidden text-[10px] leading-4 text-slate-500 sm:block">
+                              {t.description}
+                            </span>
+
+                            {selectedVehicleType === t.id && (
+                              <span className="absolute top-3 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white shadow-md">
+                                <svg
+                                  className="h-3 w-3"
+                                  viewBox="0 0 20 20"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                >
+                                  <path
+                                    d="m5 10 3 3 7-7"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              </span>
+                            )}
+                          </button>
                         ))}
-                        {errors.vehicle && (
-                          <div className="mt-3 text-sm text-red-600">
-                            {errors.vehicle}
-                          </div>
-                        )}
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {errors.vehicle && (
+                        <div className="relative mt-3 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                          {errors.vehicle}
+                        </div>
+                      )}
+
+                      <div className="relative mt-7 grid grid-cols-1 gap-4 border-t border-slate-100 pt-6 md:grid-cols-2">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-600">
                             Make / Model
                           </label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Toyota Camry"
-                            value={makeModel}
-                            onChange={(e) => setMakeModel(e.target.value)}
-                            className="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
-                          />
+                          <div className="group relative">
+                            <svg
+                              className="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.8}
+                                d="M3 13l2-5h14l2 5v6h-2v-2H5v2H3v-6Zm3.5 1.5h.01m10.99 0h.01M6 8l1.5-3h9L18 8"
+                              />
+                            </svg>
+                            <input
+                              type="text"
+                              placeholder="e.g. Toyota Camry"
+                              value={makeModel}
+                              onChange={(e) => setMakeModel(e.target.value)}
+                              className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-3.5 pr-4 pl-12 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                            />
+                          </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-600">
                             Year
                           </label>
-                          <input
-                            type="text"
-                            placeholder="e.g. 2021"
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                            className="w-full p-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-black placeholder:text-gray-400"
-                          />
+                          <div className="group relative">
+                            <svg
+                              className="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.8}
+                                d="M8 3v3m8-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z"
+                              />
+                            </svg>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={4}
+                              placeholder="e.g. 2021"
+                              value={year}
+                              onChange={(e) => setYear(e.target.value)}
+                              className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-3.5 pr-4 pl-12 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
