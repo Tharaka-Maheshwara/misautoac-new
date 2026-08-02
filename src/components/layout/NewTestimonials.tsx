@@ -186,7 +186,10 @@ export default function NewTestimonials() {
         </div>
 
         <div className="relative mx-auto max-w-6xl">
-          <div ref={sliderRef} className="keen-slider max-w-full overflow-hidden">
+          <div
+            ref={sliderRef}
+            className="keen-slider max-w-full overflow-hidden"
+          >
             {isLoading ? (
               Array.from({ length: 3 }).map((_, index) => (
                 <TestimonialCardSkeleton key={index} />
