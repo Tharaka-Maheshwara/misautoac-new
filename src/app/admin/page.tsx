@@ -336,16 +336,16 @@ export default function AdminPage() {
       } else if (dateView === "month") {
         matchesDate = Boolean(
           appointmentDate &&
-            appointmentDate.getFullYear() === now.getFullYear() &&
-            appointmentDate.getMonth() === now.getMonth(),
+          appointmentDate.getFullYear() === now.getFullYear() &&
+          appointmentDate.getMonth() === now.getMonth(),
         );
       } else if (dateView === "range") {
         matchesDate = Boolean(
           appointmentDate &&
-            start &&
-            end &&
-            appointmentDate >= start &&
-            appointmentDate <= end,
+          start &&
+          end &&
+          appointmentDate >= start &&
+          appointmentDate <= end,
         );
       }
 
