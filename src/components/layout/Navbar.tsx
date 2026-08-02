@@ -309,6 +309,11 @@ export default function Navbar() {
         : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
     }`;
 
+  const handleMobileNavSelect = () => {
+    setIsMobileMenuOpen(false);
+    setMobileDropdown(null);
+  };
+
   const renderDesktopDropdown = (
     key: DropdownKey,
     title: string,
@@ -407,6 +412,7 @@ export default function Navbar() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    onClick={handleMobileNavSelect}
                     className={`block rounded-xl px-3 py-2.5 transition-colors ${
                       isActive(item.href)
                         ? "bg-blue-50 text-blue-700"
@@ -766,7 +772,11 @@ export default function Navbar() {
           className="flex-1 overflow-y-auto overscroll-contain px-4 py-5"
         >
           <div className="space-y-1.5">
-            <Link href="/" className={mobileLinkClass("/")}>
+            <Link
+              href="/"
+              onClick={handleMobileNavSelect}
+              className={mobileLinkClass("/")}
+            >
               Home
               <ArrowIcon />
             </Link>
@@ -778,7 +788,11 @@ export default function Navbar() {
               serviceDropdownItems,
             )}
 
-            <Link href="/about" className={mobileLinkClass("/about")}>
+            <Link
+              href="/about"
+              onClick={handleMobileNavSelect}
+              className={mobileLinkClass("/about")}
+            >
               About Us
               <ArrowIcon />
             </Link>
@@ -790,13 +804,21 @@ export default function Navbar() {
               sparePartsDropdownItems,
             )}
 
-            <Link href="/contact" className={mobileLinkClass("/contact")}>
+            <Link
+              href="/contact"
+              onClick={handleMobileNavSelect}
+              className={mobileLinkClass("/contact")}
+            >
               Contact
               <ArrowIcon />
             </Link>
 
             {userRole === "Admin" ? (
-              <Link href="/admin" className={mobileLinkClass("/admin")}>
+              <Link
+                href="/admin"
+                onClick={handleMobileNavSelect}
+                className={mobileLinkClass("/admin")}
+              >
                 Admin Panel
                 <ArrowIcon />
               </Link>
@@ -873,12 +895,14 @@ export default function Navbar() {
             <div className="grid grid-cols-2 gap-2">
               <Link
                 href="/auth/login"
+                onClick={handleMobileNavSelect}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-bold text-slate-700 transition-colors hover:bg-slate-100"
               >
                 Login
               </Link>
               <Link
                 href="/auth/sign-up"
+                onClick={handleMobileNavSelect}
                 className="rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-4 py-3 text-center text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-transform active:scale-[0.98]"
               >
                 Sign Up
