@@ -233,11 +233,9 @@ export default function BookAppointmentPage() {
 
   const startingDayOfWeek = firstDayOfMonth.getDay();
 
-  const calendarDays = Array.from(
-    { length: startingDayOfWeek },
-    () => null,
-  ).concat(
-    Array.from({ length: daysInMonth }, (_, i) => {
+  const calendarDays: Array<Date | null> = [
+    ...Array.from({ length: startingDayOfWeek }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => {
       const dayDate = new Date(
         viewDate.getFullYear(),
         viewDate.getMonth(),
@@ -245,7 +243,7 @@ export default function BookAppointmentPage() {
       );
       return dayDate;
     }),
-  );
+  ];
 
   const handlePrevMonth = () => {
     setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
