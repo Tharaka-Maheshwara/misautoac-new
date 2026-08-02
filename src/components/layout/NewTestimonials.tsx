@@ -98,7 +98,7 @@ export default function NewTestimonials() {
       "(max-width: 1024px)": {
         slides: { perView: 2, spacing: 14 },
       },
-      "(max-width: 767px)": {
+      "(max-width: 768px)": {
         slides: { perView: 1, spacing: 12 },
       },
     },
@@ -186,7 +186,10 @@ export default function NewTestimonials() {
         </div>
 
         <div className="relative mx-auto max-w-6xl">
-          <div ref={sliderRef} className="keen-slider">
+          <div
+            ref={sliderRef}
+            className="keen-slider max-w-full overflow-hidden"
+          >
             {isLoading ? (
               Array.from({ length: 3 }).map((_, index) => (
                 <TestimonialCardSkeleton key={index} />
