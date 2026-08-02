@@ -425,6 +425,11 @@ export default function AdminPage() {
       return;
     }
 
+    if (!firebaseUser) {
+      setReservationError("You must be signed in to reserve a time slot.");
+      return;
+    }
+
     setIsSavingReservation(true);
 
     try {
