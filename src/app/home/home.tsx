@@ -1,6 +1,6 @@
 import Image from "next/image";
 import HeroSection from "@/components/layout/HeroSection";
-import NewTestimonials from "@/components/layout/NewTestimonials";
+import TestimonialsSection from "@/components/layout/TestimonialsSection";
 
 const services = [
   {
@@ -232,7 +232,7 @@ export default function Home() {
         </div>
       </section>
 
-      <NewTestimonials />
+      <TestimonialsSection />
       
 
 
